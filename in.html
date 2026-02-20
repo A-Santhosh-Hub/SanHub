@@ -1,0 +1,2757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SanHub | King Santhosh</title>
+    <link rel="icon" type="image/png" href="1.jpg" />
+    <!-- Icons --->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tailwind for layout utility, Custom CSS for specific Royal Theme -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        san: {
+                            dark: '#050507',       /* Deep Navy/Black */
+                            card: '#0f1218',       /* Slightly lighter for cards */
+                            gold: '#c47f00',       /* Royal Gold */
+                            goldHover: '#eac54f',
+                            red: '#8b1f1f',        /* Deep Red */
+                            cream: '#f0f6fc',      /* Text highlight */
+                            muted: '#8b949e',      /* Muted text */
+                            border: '#30363d',     /* Subtle border */
+                            btn: '#21262d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #c47f00;
+        }
+
+        /* Transitions */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Markdown Preview Basic Styling */
+        .md-preview h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .md-preview h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            margin-top: 1rem;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 0.3rem;
+        }
+
+        .md-preview p {
+            margin-bottom: 0.8rem;
+            line-height: 1.6;
+        }
+
+        .md-preview ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .md-preview code {
+            background: rgba(110, 118, 129, 0.4);
+            padding: 0.2em 0.4em;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 85%;
+        }
+
+        .md-preview pre {
+            background: #161b22;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        .md-preview a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+
+        .md-preview a:hover {
+            text-decoration: underline;
+        }
+
+        /* Tab Active State */
+        .tab-active {
+            border-bottom: 2px solid #c47f00;
+            color: #f0f6fc !important;
+            font-weight: 600;
+        }
+
+        /* Loader */
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .glass-modal {
+            background: rgba(5, 5, 7, 0.85);
+            backdrop-filter: blur(8px);
+        }
+
+        /* 3D Viewer Styles */
+        #model-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            /* Fixed height for the viewer */
+            overflow: hidden;
+            background: radial-gradient(circle at center, #161b22 0%, #050507 100%);
+        }
+
+        #model-canvas {
+            width: 100%;
+            height: 100%;
+            outline: none;
+        }
+
+        .model-overlay {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            z-index: 10;
+        }
+    </style>
+    <!-- Three.js Import Map -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+
+<body
+    class="bg-gray-50 dark:bg-san-dark text-gray-900 dark:text-san-cream min-h-screen flex flex-col font-sans antialiased selection:bg-san-gold selection:text-black transition-colors duration-300">
+
+    <!-- Header -->
+    <header
+        class="bg-white dark:bg-[#010409] border-b border-gray-200 dark:border-san-border sticky top-0 z-40 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+
+                <!-- Left: Logo & Mobile Menu -->
+                <div class="flex items-center gap-4">
+                    <div class="md:hidden cursor-pointer" onclick="toggleMobileMenu()">
+                        <i data-lucide="menu" class="w-6 h-6 text-gray-500 dark:text-san-muted"></i>
+                    </div>
+                    <a href="#" class="flex items-center gap-2 group">
+                        <div
+                            class="w-8 h-8 bg-san-gold rounded-full flex items-center justify-center text-black font-bold shadow-[0_0_10px_rgba(196,127,0,0.5)] group-hover:scale-110 transition-transform">
+                            <i data-lucide="crown" class="w-5 h-5"></i>
+                        </div>
+                        <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-san-cream">SanHub</span>
+                    </a>
+                </div>
+
+                <!-- Center: Search (Desktop) -->
+                <div class="hidden md:flex flex-1 max-w-md mx-4">
+                    <div class="relative w-full">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="search" class="w-4 h-4 text-gray-400 dark:text-san-muted"></i>
+                        </div>
+                        <input type="text" id="globalSearch" placeholder="Search or jump to..."
+                            class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md py-1.5 pl-10 pr-3 text-sm text-gray-900 dark:text-san-cream focus:ring-1 focus:ring-san-gold focus:border-san-gold transition-colors placeholder-gray-500 dark:placeholder-san-muted">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <span
+                                class="text-xs text-gray-500 dark:text-san-muted border border-gray-300 dark:border-san-border px-1.5 rounded">/</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Actions -->
+                <div class="flex items-center gap-3">
+                    <button onclick="app.toggleTheme()"
+                        class="text-gray-500 dark:text-san-muted hover:text-san-gold transition-colors p-1 rounded-md border border-transparent hover:border-gray-300 dark:hover:border-san-border">
+                        <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                    </button>
+
+                    <!-- Add Dropdown -->
+                    <div class="relative">
+                        <button onclick="toggleDropdown('addDropdown')"
+                            class="flex items-center gap-1 text-gray-700 dark:text-san-cream hover:text-gray-500 dark:hover:text-san-muted transition-colors">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div id="addDropdown"
+                            class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-san-card border border-gray-200 dark:border-san-border rounded-md shadow-lg py-1 z-50 text-gray-700 dark:text-san-cream">
+                            <a href="#" id="headerNewRepo"
+                                onclick="modal.open('repoModal'); toggleDropdown('addDropdown')"
+                                class="block px-4 py-2 text-sm hover:bg-san-gold hover:text-black">New repository</a>
+                            <a href="#" id="headerNewProject"
+                                onclick="modal.open('projectModal'); toggleDropdown('addDropdown')"
+                                class="block px-4 py-2 text-sm hover:bg-san-gold hover:text-black">New project</a>
+                            <div id="headerDivider" class="border-t border-gray-200 dark:border-san-border my-1"></div>
+                            <a href="#" onclick="app.openUserModal(); toggleDropdown('addDropdown')"
+                                class="block px-4 py-2 text-sm hover:bg-san-gold hover:text-black text-san-gold font-bold">Switch
+                                Account</a>
+                            <div id="headerDivider2" class="border-t border-gray-200 dark:border-san-border my-1"></div>
+                            <a href="#" id="headerExport" onclick="app.exportData(); toggleDropdown('addDropdown')"
+                                class="block px-4 py-2 text-sm hover:bg-san-gold hover:text-black">Export Data</a>
+                            <label id="headerImport"
+                                class="block px-4 py-2 text-sm hover:bg-san-gold hover:text-black cursor-pointer">
+                                Import JSON
+                                <input type="file" class="hidden" onchange="app.importData(this)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Avatar -->
+                    <div class="relative group">
+                        <div
+                            class="w-8 h-8 rounded-full overflow-hidden border border-gray-200 dark:border-san-border ring-2 ring-transparent group-hover:ring-san-gold transition-all cursor-pointer">
+                            <img id="headerAvatar" src="1.jpg" alt="Avatar" class="bg-gray-200 dark:bg-san-btn">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="flex items-center gap-6 mt-4 overflow-x-auto scrollbar-hide">
+                <a href="#overview"
+                    class="nav-tab flex items-center gap-2 pb-3 text-sm text-gray-500 dark:text-san-muted hover:text-gray-900 dark:hover:text-san-cream border-b-2 border-transparent transition-all whitespace-nowrap"
+                    id="tab-overview">
+                    <i data-lucide="book-open" class="w-4 h-4"></i> Overview
+                </a>
+                <a href="#repositories"
+                    class="nav-tab flex items-center gap-2 pb-3 text-sm text-gray-500 dark:text-san-muted hover:text-gray-900 dark:hover:text-san-cream border-b-2 border-transparent transition-all whitespace-nowrap"
+                    id="tab-repositories">
+                    <i data-lucide="package" class="w-4 h-4"></i> Repositories
+                    <span id="repoCountBadge"
+                        class="bg-gray-200 dark:bg-san-border text-xs px-2 py-0.5 rounded-full text-gray-600 dark:text-san-cream">0</span>
+                </a>
+                <a href="#projects"
+                    class="nav-tab flex items-center gap-2 pb-3 text-sm text-gray-500 dark:text-san-muted hover:text-gray-900 dark:hover:text-san-cream border-b-2 border-transparent transition-all whitespace-nowrap"
+                    id="tab-projects">
+                    <i data-lucide="layout-template" class="w-4 h-4"></i> Projects
+                </a>
+                <a href="#packages"
+                    class="nav-tab flex items-center gap-2 pb-3 text-sm text-gray-500 dark:text-san-muted hover:text-gray-900 dark:hover:text-san-cream border-b-2 border-transparent transition-all whitespace-nowrap"
+                    id="tab-packages">
+                    <i data-lucide="package" class="w-4 h-4"></i> Packages
+                </a>
+                <a href="#stars"
+                    class="nav-tab flex items-center gap-2 pb-3 text-sm text-gray-500 dark:text-san-muted hover:text-gray-900 dark:hover:text-san-cream border-b-2 border-transparent transition-all whitespace-nowrap"
+                    id="tab-stars">
+                    <i data-lucide="star" class="w-4 h-4"></i> Stars
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full grid grid-cols-1 md:grid-cols-12 gap-8">
+
+        <!-- Profile Sidebar (Always visible on large screens, top on mobile) -->
+        <aside id="profileSidebar" class="md:block md:col-span-3 lg:col-span-3 space-y-6 fade-in">
+            <div class="relative group w-full max-w-[280px] mx-auto md:mx-0">
+                <img id="profileAvatar" src="1.jpg" alt="Profile"
+                    class="w-full rounded-full border-2 border-gray-200 dark:border-san-border shadow-xl group-hover:border-san-gold transition-colors bg-gray-100 dark:bg-san-btn">
+                <!-- Avatar Upload Button -->
+                <label id="avatarUploadLabel"
+                    class="absolute bottom-5 right-5 bg-white dark:bg-san-card border border-gray-200 dark:border-san-border p-2 rounded-full shadow-lg cursor-pointer hover:text-san-gold text-gray-500 dark:text-san-muted transition-colors"
+                    title="Change Profile Picture">
+                    <i data-lucide="camera" class="w-5 h-5"></i>
+                    <input type="file" id="avatarUpload" accept="image/*" class="hidden"
+                        onchange="app.updateAvatar(this)">
+                </label>
+            </div>
+
+            <div class="text-center md:text-left">
+                <h1 id="profileName" class="text-2xl font-bold text-gray-900 dark:text-san-cream">King Santhosh</h1>
+                <p id="profileOwner" class="text-xl text-gray-500 dark:text-san-muted font-light">SanStudio</p>
+            </div>
+
+            <p id="profileBio" class="text-gray-700 dark:text-san-cream leading-relaxed typing-cursor"></p>
+
+            <a id="whatsappLink" href="https://wa.me/9003356047" target="_blank"
+                class="w-full bg-green-600 border border-green-700 text-white py-1.5 rounded-md font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+                <i data-lucide="message-circle" class="w-5 h-5"></i> Contact on WhatsApp
+            </a>
+
+            <!-- Updated Contact Links Section -->
+            <div class="space-y-3 text-sm text-gray-500 dark:text-san-muted" id="profileLinks">
+                <!-- Injected by JS -->
+            </div>
+
+            <div class="border-t border-gray-200 dark:border-san-border pt-4">
+                <h3 class="font-bold text-gray-900 dark:text-san-cream mb-2">Skills</h3>
+                <div class="flex flex-wrap gap-2" id="skillTags">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <button id="editProfileBtn" onclick="app.openEditProfileModal()"
+                    class="w-full bg-gray-100 dark:bg-san-btn border border-gray-200 dark:border-san-border text-gray-900 dark:text-san-cream py-2 rounded-md font-bold text-sm hover:border-san-gold transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i> Edit Profile
+                </button>
+            </div>
+        </aside>
+
+        <!-- Dynamic View Container -->
+        <div id="router-view" class="md:col-span-9 lg:col-span-9">
+            <!-- Content rendered by JS -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer
+        class="border-t border-gray-200 dark:border-san-border mt-12 py-8 bg-white dark:bg-[#010409] transition-colors">
+        <div
+            class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-san-muted">
+            <div class="flex items-center gap-2">
+                <div
+                    class="w-6 h-6 bg-gray-200 dark:bg-san-border rounded-full flex items-center justify-center text-gray-900 dark:text-san-cream opacity-50">
+                    <i data-lucide="crown" class="w-3 h-3"></i>
+                </div>
+                <span>© 2025 SanHub</span>
+            </div>
+            <div class="flex gap-6">
+                <a href="javascript:void(0)" onclick="app.openInfoModal('terms')"
+                    class="hover:text-san-gold hover:underline">Terms</a>
+                <a href="javascript:void(0)" onclick="app.openInfoModal('privacy')"
+                    class="hover:text-san-gold hover:underline">Privacy</a>
+                <a href="javascript:void(0)" onclick="app.openInfoModal('security')"
+                    class="hover:text-san-gold hover:underline">Security</a>
+                <a href="javascript:void(0)" onclick="app.openInfoModal('status')"
+                    class="hover:text-san-gold hover:underline">Status</a>
+            </div>
+            <p>Developed by <a href="https://sanstudio.neocities.org/" target="_blank"
+                    class="text-san-gold hover:underline font-bold">SanStudio</a></p>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+
+    <!-- Add Repository Modal -->
+    <div id="repoModal"
+        class="fixed inset-0 glass-modal hidden z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-san-card border border-gray-200 dark:border-san-border w-full max-w-lg rounded-lg shadow-2xl transform scale-95 transition-transform duration-300"
+            id="repoModalContent">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-san-border">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-san-cream">Create a new repository</h3>
+                <button onclick="modal.close('repoModal')"
+                    class="text-gray-500 dark:text-san-muted hover:text-red-500 dark:hover:text-san-red"><i
+                        data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="repoForm" class="p-4 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">Repository Name
+                        <span class="text-red-500 dark:text-san-red">*</span></label>
+                    <input type="text" name="name" required
+                        class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">Description</label>
+                    <input type="text" name="description"
+                        class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">Language</label>
+                        <input type="text" name="language" placeholder="e.g. JavaScript"
+                            class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">Project Live
+                            Link</label>
+                        <input type="url" name="live_url" placeholder="https://..."
+                            class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">README Content
+                        (Markdown)</label>
+                    <textarea name="readme" rows="3"
+                        class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none font-mono text-sm"
+                        placeholder="# Project Title\n\nWrite your readme here..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">Source Code
+                        (.txt)</label>
+                    <textarea name="source_code" rows="5"
+                        class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none font-mono text-xs"
+                        placeholder="Paste your source code here..."></textarea>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="modal.close('repoModal')"
+                        class="px-4 py-2 bg-transparent border border-gray-300 dark:border-san-border rounded-md text-gray-700 dark:text-san-cream hover:bg-gray-100 dark:hover:bg-san-border">Cancel</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-green-600 dark:bg-green-700 border border-transparent rounded-md text-white hover:bg-green-500 dark:hover:bg-green-600 font-medium">Create
+                        repository</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Project Modal -->
+    <div id="projectModal" class="fixed inset-0 glass-modal hidden z-50 flex items-center justify-center p-4">
+        <div
+            class="bg-white dark:bg-san-card border border-gray-200 dark:border-san-border w-full max-w-lg rounded-lg shadow-2xl">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-san-border">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-san-cream">Publish a Project</h3>
+                <button onclick="modal.close('projectModal')"
+                    class="text-gray-500 dark:text-san-muted hover:text-red-500 dark:hover:text-san-red"><i
+                        data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="projectForm" class="p-4 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">Project Title <span
+                            class="text-red-500 dark:text-san-red">*</span></label>
+                    <input type="text" name="title" required
+                        class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">Host URL
+                        (https://)</label>
+                    <input type="url" name="host_url" placeholder="https://"
+                        class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">Description</label>
+                    <textarea name="description" rows="2"
+                        class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none"></textarea>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="modal.close('projectModal')"
+                        class="px-4 py-2 bg-transparent border border-gray-300 dark:border-san-border rounded-md text-gray-700 dark:text-san-cream hover:bg-gray-100 dark:hover:bg-san-border">Cancel</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-san-gold border border-transparent rounded-md text-black hover:bg-san-goldHover font-medium">Publish
+                        Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Switch User Modal -->
+    <div id="userModal" class="fixed inset-0 glass-modal hidden z-50 flex items-center justify-center p-4">
+        <div
+            class="bg-white dark:bg-san-card border border-gray-200 dark:border-san-border w-full max-w-md rounded-lg shadow-2xl overflow-hidden">
+            <div
+                class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-san-border bg-gray-50 dark:bg-[#010409]">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-san-cream">Switch Account</h3>
+                <button onclick="modal.close('userModal')"
+                    class="text-gray-500 dark:text-san-muted hover:text-red-500 dark:hover:text-san-red"><i
+                        data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <div class="p-4 bg-white dark:bg-san-card max-h-[300px] overflow-y-auto custom-scrollbar space-y-2"
+                id="userList">
+                <!-- Injected via JS -->
+            </div>
+
+            <div class="p-4 border-t border-gray-200 dark:border-san-border bg-gray-50 dark:bg-[#010409]">
+                <label class="block text-xs font-bold text-gray-500 dark:text-san-muted uppercase mb-2">Create New
+                    Identity</label>
+                <div class="space-y-2">
+                    <input type="text" id="newUserName" placeholder="Full Name"
+                        class="w-full bg-white dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md px-3 py-2 text-sm text-gray-900 dark:text-san-cream focus:border-san-gold outline-none">
+                    <div class="flex gap-2">
+                        <input type="password" id="newUserPassword" placeholder="Password (Optional)"
+                            class="flex-1 bg-white dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md px-3 py-2 text-sm text-gray-900 dark:text-san-cream focus:border-san-gold outline-none">
+                        <button onclick="app.createNewUser()"
+                            class="bg-san-gold hover:bg-san-goldHover text-black px-4 py-2 rounded-md font-bold text-sm whitespace-nowrap">Create</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login / Password Check Modal -->
+    <div id="loginModal" class="fixed inset-0 glass-modal hidden z-[60] flex items-center justify-center p-4">
+        <div
+            class="bg-white dark:bg-san-card border border-gray-200 dark:border-san-border w-full max-w-sm rounded-lg shadow-2xl">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-san-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="lock" class="w-8 h-8 text-san-gold"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-san-cream mb-1">Account Locked</h3>
+                <p class="text-sm text-gray-500 dark:text-san-muted mb-6">Please enter the password for this account.
+                </p>
+
+                <input type="password" id="loginPassword" placeholder="Password"
+                    class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md px-4 py-3 text-lg text-center text-gray-900 dark:text-san-cream focus:border-san-gold outline-none mb-4">
+
+                <div class="flex gap-2">
+                    <button onclick="modal.close('loginModal')"
+                        class="flex-1 px-4 py-2 border border-gray-300 dark:border-san-border rounded-md text-gray-700 dark:text-san-cream">Cancel</button>
+                    <button onclick="app.verifyLogin()"
+                        class="flex-1 px-4 py-2 bg-san-gold hover:bg-san-goldHover text-black font-bold rounded-md">Unlock</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="fixed inset-0 glass-modal hidden z-50 flex items-center justify-center p-4">
+        <div
+            class="bg-white dark:bg-san-card border border-gray-200 dark:border-san-border w-full max-w-2xl rounded-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div
+                class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-san-border bg-gray-50 dark:bg-[#010409]">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-san-cream">Edit Profile</h3>
+                <button onclick="modal.close('editProfileModal')"
+                    class="text-gray-500 dark:text-san-muted hover:text-red-500"><i data-lucide="x"
+                        class="w-5 h-5"></i></button>
+            </div>
+
+            <form id="profileEditForm" class="p-6 overflow-y-auto custom-scrollbar space-y-6">
+                <!-- Basic Info -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Display Name</label>
+                        <input type="text" name="displayName"
+                            class="w-full bg-gray-50 dark:bg-san-dark border border-gray-200 dark:border-san-border rounded px-3 py-2 text-sm text-gray-900 dark:text-san-cream outline-none focus:border-san-gold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Owner / Studio Name</label>
+                        <input type="text" name="owner"
+                            class="w-full bg-gray-50 dark:bg-san-dark border border-gray-200 dark:border-san-border rounded px-3 py-2 text-sm text-gray-900 dark:text-san-cream outline-none focus:border-san-gold">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Bio</label>
+                    <textarea name="bio" rows="3"
+                        class="w-full bg-gray-50 dark:bg-san-dark border border-gray-200 dark:border-san-border rounded px-3 py-2 text-sm text-gray-900 dark:text-san-cream outline-none focus:border-san-gold"></textarea>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="space-y-4">
+                    <h4 class="text-sm font-bold text-san-gold pt-2 border-t border-gray-100 dark:border-san-border">
+                        Contact & Socials</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Location</label>
+                            <input type="text" name="location"
+                                class="w-full bg-gray-50 dark:bg-san-dark border border-gray-200 dark:border-san-border rounded px-3 py-2 text-sm text-gray-900 dark:text-san-cream outline-none focus:border-san-gold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Email</label>
+                            <input type="email" name="email"
+                                class="w-full bg-gray-50 dark:bg-san-dark border border-gray-200 dark:border-san-border rounded px-3 py-2 text-sm text-gray-900 dark:text-san-cream outline-none focus:border-san-gold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Website</label>
+                            <input type="text" name="website"
+                                class="w-full bg-gray-50 dark:bg-san-dark border border-gray-200 dark:border-san-border rounded px-3 py-2 text-sm text-gray-900 dark:text-san-cream outline-none focus:border-san-gold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">WhatsApp</label>
+                            <input type="text" name="whatsapp"
+                                class="w-full bg-gray-50 dark:bg-san-dark border border-gray-200 dark:border-san-border rounded px-3 py-2 text-sm text-gray-900 dark:text-san-cream outline-none focus:border-san-gold">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Instagram
+                                Username</label>
+                            <input type="text" name="instagram"
+                                class="w-full bg-gray-50 dark:bg-san-dark border border-gray-200 dark:border-san-border rounded px-3 py-2 text-sm text-gray-900 dark:text-san-cream outline-none focus:border-san-gold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">LinkedIn
+                                Username</label>
+                            <input type="text" name="linkedin"
+                                class="w-full bg-gray-50 dark:bg-san-dark border border-gray-200 dark:border-san-border rounded px-3 py-2 text-sm text-gray-900 dark:text-san-cream outline-none focus:border-san-gold">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Skills (Comma separated)</label>
+                    <input type="text" name="skills"
+                        class="w-full bg-gray-50 dark:bg-san-dark border border-gray-200 dark:border-san-border rounded px-3 py-2 text-sm text-gray-900 dark:text-san-cream outline-none focus:border-san-gold">
+                </div>
+
+                <div class="pt-4 border-t border-gray-100 dark:border-san-border">
+                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Account Security</label>
+                    <input type="password" name="password" placeholder="Change Password (leave blank to keep)"
+                        class="w-full bg-gray-50 dark:bg-san-dark border border-gray-200 dark:border-san-border rounded px-3 py-2 text-sm text-gray-900 dark:text-san-cream outline-none focus:border-san-gold">
+                </div>
+
+                <div class="pt-6 border-t border-gray-200 dark:border-san-border flex justify-end gap-3">
+                    <button type="button" onclick="modal.close('editProfileModal')"
+                        class="px-4 py-2 border border-gray-300 dark:border-san-border rounded-md text-gray-700 dark:text-san-cream">Cancel</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-san-gold hover:bg-san-goldHover text-black font-bold rounded-md">Save
+                        Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Info / Policy Modal -->
+    <div id="infoModal"
+        class="fixed inset-0 glass-modal hidden z-[70] flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div
+            class="bg-white dark:bg-san-card border border-gray-200 dark:border-san-border w-full max-w-2xl rounded-lg shadow-2xl flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-san-border">
+                <h3 id="infoModalTitle"
+                    class="text-xl font-bold text-gray-900 dark:text-san-cream flex items-center gap-2"></h3>
+                <button onclick="modal.close('infoModal')" class="text-gray-500 hover:text-red-500 transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div id="infoModalRef"
+                class="p-6 overflow-y-auto custom-scrollbar text-gray-700 dark:text-san-cream leading-relaxed space-y-4">
+                <!-- Injected via JS -->
+            </div>
+            <div
+                class="p-4 border-t border-gray-200 dark:border-san-border bg-gray-50 dark:bg-[#010409] flex justify-end">
+                <button onclick="modal.close('infoModal')"
+                    class="px-6 py-2 bg-san-gold hover:bg-san-goldHover text-black font-bold rounded-md transition-colors">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Repo Modal -->
+    <div id="editRepoModal" class="fixed inset-0 glass-modal hidden z-50 flex items-center justify-center p-4">
+        <div
+            class="bg-white dark:bg-san-card border border-gray-200 dark:border-san-border w-full max-w-lg rounded-lg shadow-2xl">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-san-border">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-san-cream">Edit Repository</h3>
+                <button onclick="modal.close('editRepoModal')"
+                    class="text-gray-500 dark:text-san-muted hover:text-red-500"><i data-lucide="x"
+                        class="w-5 h-5"></i></button>
+            </div>
+            <form id="editRepoForm" class="p-4 space-y-4">
+                <input type="hidden" name="id">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">Repository
+                        Name</label>
+                    <input type="text" name="name" required
+                        class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">Description</label>
+                    <input type="text" name="description"
+                        class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">Language</label>
+                        <input type="text" name="language"
+                            class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">README Content
+                        (Markdown)</label>
+                    <textarea name="readme" rows="4"
+                        class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none font-mono text-sm"></textarea>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="modal.close('editRepoModal')"
+                        class="px-4 py-2 border border-gray-300 dark:border-san-border rounded-md text-gray-700 dark:text-san-cream">Cancel</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-san-gold text-black rounded-md font-bold hover:bg-san-goldHover">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Project Modal -->
+    <div id="editProjectModal" class="fixed inset-0 glass-modal hidden z-50 flex items-center justify-center p-4">
+        <div
+            class="bg-white dark:bg-san-card border border-gray-200 dark:border-san-border w-full max-w-lg rounded-lg shadow-2xl">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-san-border">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-san-cream">Edit Project</h3>
+                <button onclick="modal.close('editProjectModal')"
+                    class="text-gray-500 dark:text-san-muted hover:text-red-500"><i data-lucide="x"
+                        class="w-5 h-5"></i></button>
+            </div>
+            <form id="editProjectForm" class="p-4 space-y-4">
+                <input type="hidden" name="id">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">Project
+                        Title</label>
+                    <input type="text" name="title" required
+                        class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">Host URL</label>
+                    <input type="url" name="host_url"
+                        class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">Description</label>
+                    <textarea name="description" rows="2"
+                        class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none"></textarea>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="modal.close('editProjectModal')"
+                        class="px-4 py-2 border border-gray-300 dark:border-san-border rounded-md text-gray-700 dark:text-san-cream">Cancel</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-san-gold text-black rounded-md font-bold hover:bg-san-goldHover">Update
+                        Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Repository Quick View Modal (Pop Tab) -->
+    <div id="repoDetailModal"
+        class="fixed inset-0 glass-modal hidden z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div
+            class="bg-white dark:bg-san-card border border-gray-200 dark:border-san-border w-full max-w-2xl rounded-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div
+                class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-san-border bg-gray-50 dark:bg-[#010409]">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="info" class="text-san-gold"></i>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-san-cream">Repository Quick View</h3>
+                </div>
+                <button onclick="modal.close('repoDetailModal')"
+                    class="text-gray-500 dark:text-san-muted hover:text-red-500"><i data-lucide="x"
+                        class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto custom-scrollbar space-y-6">
+                <div>
+                    <h4 id="detailRepoName" class="text-2xl font-bold text-san-gold mb-1">Project Name</h4>
+                    <p id="detailRepoDesc" class="text-gray-600 dark:text-san-muted text-sm italic">Project description
+                        goes here...</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div
+                        class="p-3 bg-gray-50 dark:bg-san-btn/20 border border-gray-100 dark:border-san-border rounded-lg">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Primary Language</label>
+                        <div id="detailRepoLang"
+                            class="text-sm font-bold text-gray-900 dark:text-san-cream flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-yellow-400"></div> JavaScript
+                        </div>
+                    </div>
+                    <div
+                        class="p-3 bg-gray-50 dark:bg-san-btn/20 border border-gray-100 dark:border-san-border rounded-lg">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Project Live
+                            Link</label>
+                        <a id="detailRepoLink" href="#" target="_blank"
+                            class="text-sm font-bold text-blue-500 hover:underline flex items-center gap-1">
+                            <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Visit Site
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-3 flex items-center gap-2">
+                        <i data-lucide="code" class="w-3.5 h-3.5"></i> Source Code
+                    </label>
+                    <div
+                        class="bg-[#0d1117] rounded-lg p-4 border border-gray-100 dark:border-san-border overflow-hidden relative group">
+                        <pre id="detailRepoSource"
+                            class="text-[11px] text-gray-300 font-mono leading-relaxed overflow-x-auto custom-scrollbar max-h-60">
+// Loading source code...
+                        </pre>
+                        <button onclick="utils.copyToClipboard(document.getElementById('detailRepoSource').textContent)"
+                            class="absolute top-2 right-2 p-1.5 bg-gray-800 text-gray-400 rounded hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-gray-100 dark:border-san-border flex justify-between items-center">
+                    <button id="goToRepoHub"
+                        class="bg-gray-100 dark:bg-san-btn border border-gray-200 dark:border-san-border text-gray-900 dark:text-san-cream px-4 py-2 rounded-md font-bold text-sm hover:border-san-gold transition-all flex items-center gap-2">
+                        <i data-lucide="folder-open" class="w-4 h-4"></i> Enter Repository Hub
+                    </button>
+                    <button onclick="modal.close('repoDetailModal')"
+                        class="bg-san-gold hover:bg-san-goldHover text-black px-6 py-2 rounded-md font-bold text-sm transition-all">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Repo Details Drawer -->
+    <div id="detailsDrawer"
+        class="fixed inset-y-0 right-0 w-full md:w-[600px] bg-white dark:bg-san-card border-l border-gray-200 dark:border-san-border z-50 transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col">
+        <div
+            class="p-4 border-b border-gray-200 dark:border-san-border flex justify-between items-center bg-gray-50 dark:bg-[#010409]">
+            <div class="flex items-center gap-2">
+                <i data-lucide="book-open" class="text-gray-500 dark:text-san-muted"></i>
+                <h2 id="drawerTitle" class="text-lg font-bold text-san-gold">Repo Name</h2>
+                <span id="drawerBadge"
+                    class="text-xs border border-gray-300 dark:border-san-border px-2 py-0.5 rounded-full text-gray-500 dark:text-san-muted">Public</span>
+            </div>
+            <button onclick="drawer.close()"
+                class="text-gray-500 dark:text-san-muted hover:text-red-500 dark:hover:text-san-red"><i
+                    data-lucide="x"></i></button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-6 custom-scrollbar bg-white dark:bg-san-card">
+            <div class="flex gap-2 mb-6">
+                <button id="drawerStarBtn"
+                    class="flex-1 flex items-center justify-center gap-2 bg-gray-100 dark:bg-san-btn border border-gray-200 dark:border-san-border py-1.5 rounded-md text-sm font-medium hover:bg-gray-200 dark:hover:bg-san-border transition-colors text-gray-700 dark:text-san-cream">
+                    <i data-lucide="star" class="w-4 h-4"></i> <span>Star</span>
+                </button>
+                <button id="drawerDownloadBtn"
+                    class="flex-1 flex items-center justify-center gap-2 bg-gray-100 dark:bg-san-btn border border-gray-200 dark:border-san-border py-1.5 rounded-md text-sm font-medium hover:bg-gray-200 dark:hover:bg-san-border transition-colors text-gray-700 dark:text-san-cream">
+                    <i data-lucide="download" class="w-4 h-4"></i> <span>Readme</span>
+                </button>
+            </div>
+
+            <p id="drawerDesc" class="text-gray-800 dark:text-san-cream mb-6 italic text-lg"></p>
+
+            <div
+                class="bg-gray-50 dark:bg-[#0d1117] border border-gray-200 dark:border-san-border rounded-lg overflow-hidden">
+                <div
+                    class="bg-gray-200 dark:bg-san-btn px-4 py-2 border-b border-gray-200 dark:border-san-border flex items-center gap-2 text-xs font-mono text-gray-700 dark:text-san-cream">
+                    <i data-lucide="file-text" class="w-3 h-3"></i> README.md
+                </div>
+                <div id="drawerReadme" class="p-6 md-preview text-sm text-gray-800 dark:text-san-cream"></div>
+            </div>
+
+            <div class="mt-8">
+                <h4 class="font-bold text-gray-900 dark:text-san-cream mb-2">Tech Stack</h4>
+                <div id="drawerTags" class="flex flex-wrap gap-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Iframe Preview Modal -->
+    <div id="previewModal" class="fixed inset-0 glass-modal hidden z-50 flex flex-col">
+        <div
+            class="flex justify-between items-center p-3 bg-white dark:bg-[#010409] border-b border-gray-200 dark:border-san-border">
+            <div class="flex items-center gap-3">
+                <h3 id="previewTitle" class="font-bold text-gray-900 dark:text-san-cream">Project Preview</h3>
+                <a id="previewLink" href="#" target="_blank"
+                    class="text-xs text-blue-500 dark:text-san-blue hover:underline flex items-center gap-1">
+                    Open in new tab <i data-lucide="external-link" class="w-3 h-3"></i>
+                </a>
+            </div>
+            <button onclick="modal.close('previewModal')"
+                class="text-gray-500 dark:text-san-muted hover:text-gray-900 dark:hover:text-san-cream"><i
+                    data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div class="flex-1 relative bg-white dark:bg-san-dark">
+            <iframe id="projectIframe" class="w-full h-full border-none"
+                sandbox="allow-scripts allow-same-origin"></iframe>
+            <div id="iframeFallback"
+                class="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-san-dark text-gray-500 dark:text-san-muted hidden">
+                <div class="text-center">
+                    <i data-lucide="shield-alert" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+                    <p>This site cannot be embedded.</p>
+                    <a id="fallbackLink" href="#" target="_blank" class="text-san-gold underline mt-2 block">Click to
+                        open</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // --- 1. Data Model & Initial State ---
+        const DEFAULT_DATA = {
+            meta: {
+                owner: "SanStudio",
+                displayName: "King Santhosh",
+                bio: "Think. Build. Finish. Full Stack Developer creating digital empires.",
+                avatar: "1.jpg",
+                contact: {
+                    location: "Chennai",
+                    email: "crazycangstersanthosh@gmail.com",
+                    website: "https://santhosh2025.neocities.org",
+                    whatsapp: "+919003356047",
+                    instagram: "santhosh_747_dark",
+                    facebook: "santhosh.mp.12139",
+                    linkedin: "santhosh-a-bb5622305",
+                    youtube: "https://youtube.com/@crazyvideos788?si=r4XQDUKeqeJb5Fes"
+                },
+                skills: ["JavaScript", "HTML/CSS", "React", "Node.js", "Tailwind"],
+                password: null // New: Account lock
+            },
+            repositories: [
+                {
+                    id: "empire-foundation",
+                    name: "empire-foundation",
+                    description: "Starter kit for SanHub — static UI and templates.",
+                    tags: ["frontend", "template", "css"],
+                    language: "HTML/CSS",
+                    updated_at: new Date().toISOString(),
+                    stars: 12,
+                    isStarred: true,
+                    readme: "# Empire Foundation\n\nA robust starter kit for building GitHub-inspired portfolios.\n\n## Features\n- Dark Mode\n- Responsive\n- LocalStorage",
+                    demo_url: "#",
+                    files: [
+                        { name: "index.html", type: "file", content: "<html>...</html>", size: "12kb" },
+                        { name: "styles.css", type: "file", content: "body { ... }", size: "4kb" },
+                        {
+                            name: "src", type: "dir", children: [
+                                { name: "main.js", type: "file", content: "console.log('init');", size: "2kb" }
+                            ]
+                        },
+                        { name: "assets", type: "dir", children: [] }
+                    ],
+                    commits: [
+                        { id: "c1", message: "Initial commit", date: new Date(Date.now() - 86400000 * 5).toISOString(), author: "King Santhosh" },
+                        { id: "c2", message: "Update UI theme", date: new Date(Date.now() - 86400000 * 2).toISOString(), author: "King Santhosh" }
+                    ],
+                    issues: [
+                        { id: "i1", title: "Button alignment bug", status: "open", date: new Date().toISOString() },
+                        { id: "i2", title: "Dark mode flicker", status: "closed", date: new Date().toISOString() }
+                    ]
+                },
+                {
+                    id: "js-utils",
+                    name: "vanilla-js-utils",
+                    description: "Collection of dependency-free JavaScript utility functions.",
+                    tags: ["javascript", "utility"],
+                    language: "JavaScript",
+                    updated_at: new Date(Date.now() - 86400000 * 2).toISOString(), // 2 days ago
+                    stars: 45,
+                    readme: "# JS Utils\n\nCopy paste ready functions for your projects.",
+                    demo_url: "#",
+                    files: [
+                        { name: "math.js", type: "file", content: "export const add = ...", size: "1kb" },
+                        { name: "dom.js", type: "file", content: "export const $ = ...", size: "3kb" }
+                    ],
+                    commits: [
+                        { id: "v1", message: "Add math utilities", date: new Date().toISOString(), author: "King Santhosh" }
+                    ],
+                    issues: []
+                }
+            ],
+            projects: [
+                {
+                    id: "empire-site",
+                    title: "Empire Live",
+                    description: "Hosted landing page for the empire.",
+                    host_url: "https://example.com",
+                    tags: ["frontend", "live"],
+                    published_at: new Date().toISOString()
+                }
+            ],
+            activity: [
+                {
+                    type: "star",
+                    text: "Starred repository empire-foundation",
+                    date: new Date().toISOString(),
+                    refId: "empire-foundation"
+                }
+            ],
+            preferences: {
+                theme: "dark"
+            }
+        };
+
+        // Store singleton
+        // Store singleton
+        const store = {
+            data: null, // This will now hold { currentUser: 'id', users: { 'id': { ... } } }
+            init() {
+                const stored = localStorage.getItem('sanhub_data');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    // Check if it's the old format (directly has 'meta' property)
+                    if (parsed.meta) {
+                        // Migrate old data
+                        this.data = {
+                            currentUser: 'default',
+                            users: {
+                                'default': parsed
+                            }
+                        };
+                        this.save();
+                        console.log("Migrated single-user data to multi-user format.");
+                    } else {
+                        this.data = parsed;
+                    }
+                } else {
+                    // Initialize with default
+                    this.data = {
+                        currentUser: 'default',
+                        users: {
+                            'default': JSON.parse(JSON.stringify(DEFAULT_DATA))
+                        }
+                    };
+                    this.save();
+                }
+                this.applyTheme();
+
+                // Patch: Ensure existing users also get the 1.jpg avatar if they haven't changed it
+                if (this.data.users.default &&
+                    (this.data.users.default.meta.avatar.includes('dicebear') ||
+                        this.data.users.default.meta.avatar === '')) {
+                    this.data.users.default.meta.avatar = '1.jpg';
+                    this.save();
+                }
+            },
+
+            get currentUser() {
+                return this.data.users[this.data.currentUser];
+            },
+
+            save() {
+                localStorage.setItem('sanhub_data', JSON.stringify(this.data));
+            },
+
+            switchUser(userId, providedPassword = null) {
+                const user = this.data.users[userId];
+                if (user) {
+                    // Check if password is required and correct
+                    if (user.meta.password && user.meta.password !== providedPassword) {
+                        return { success: false, reason: 'password_required' };
+                    }
+
+                    this.data.currentUser = userId;
+                    this.save();
+                    this.applyTheme();
+                    return { success: true };
+                }
+                return { success: false, reason: 'invalid_user' };
+            },
+
+            createUser(name, password = null) {
+                const id = name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now().toString().slice(-4);
+                const newUser = JSON.parse(JSON.stringify(DEFAULT_DATA));
+                newUser.meta.displayName = name;
+                newUser.meta.owner = name + "'s Hub";
+                newUser.meta.avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`;
+                newUser.meta.password = password;
+
+                this.data.users[id] = newUser;
+                this.data.currentUser = id; // Auto-switch to new user
+                this.save();
+                return id;
+            },
+
+            addRepo(repo) {
+                this.currentUser.repositories.unshift(repo);
+                this.addActivity({
+                    type: 'repo',
+                    text: `Created repository ${repo.name}`,
+                    date: new Date().toISOString(),
+                    refId: repo.id
+                });
+                this.save();
+            },
+            addProject(proj) {
+                this.currentUser.projects.unshift(proj);
+                this.addActivity({
+                    type: 'project',
+                    text: `Published project ${proj.title}`,
+                    date: new Date().toISOString(),
+                    refId: proj.id
+                });
+                this.save();
+            },
+            addActivity(act) {
+                this.currentUser.activity.unshift(act);
+                // Keep only last 50 activities
+                if (this.currentUser.activity.length > 50) this.currentUser.activity.pop();
+            },
+            toggleStar(repoId) {
+                const repo = this.currentUser.repositories.find(r => r.id === repoId);
+                if (repo) {
+                    if (repo.isStarred) {
+                        repo.stars = Math.max(0, (repo.stars || 1) - 1);
+                        repo.isStarred = false;
+                        // Optional: remove activity (for simplicity we just add "unstarred" or leave as is)
+                        this.addActivity({
+                            type: 'unstar',
+                            text: `Unstarred repository ${repo.name}`,
+                            date: new Date().toISOString(),
+                            refId: repo.id
+                        });
+                    } else {
+                        repo.stars = (repo.stars || 0) + 1;
+                        repo.isStarred = true;
+                        this.addActivity({
+                            type: 'star',
+                            text: `Starred repository ${repo.name}`,
+                            date: new Date().toISOString(),
+                            refId: repo.id
+                        });
+                    }
+                    this.save();
+                    return true;
+                }
+                return false;
+            },
+            updateRepo(id, data) {
+                const idx = this.currentUser.repositories.findIndex(r => r.id === id);
+                if (idx !== -1) {
+                    this.currentUser.repositories[idx] = { ...this.currentUser.repositories[idx], ...data, updated_at: new Date().toISOString() };
+                    this.save();
+                    return true;
+                }
+                return false;
+            },
+            deleteRepo(id) {
+                const idx = this.currentUser.repositories.findIndex(r => r.id === id);
+                if (idx !== -1) {
+                    this.currentUser.repositories.splice(idx, 1);
+                    this.save();
+                    return true;
+                }
+                return false;
+            },
+            updateProject(id, data) {
+                const idx = this.currentUser.projects.findIndex(p => p.id === id);
+                if (idx !== -1) {
+                    this.currentUser.projects[idx] = { ...this.currentUser.projects[idx], ...data };
+                    this.save();
+                    return true;
+                }
+                return false;
+            },
+            deleteProject(id) {
+                const idx = this.currentUser.projects.findIndex(p => p.id === id);
+                if (idx !== -1) {
+                    this.currentUser.projects.splice(idx, 1);
+                    this.save();
+                    return true;
+                }
+                return false;
+            },
+            applyTheme() {
+                if (this.currentUser.preferences.theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            },
+            toggleTheme() {
+                this.currentUser.preferences.theme = this.currentUser.preferences.theme === 'dark' ? 'light' : 'dark';
+                this.save();
+                this.applyTheme();
+            }
+        };
+
+        // --- 2. Utility Functions ---
+        const utils = {
+            timeAgo(dateString) {
+                const date = new Date(dateString);
+                const seconds = Math.floor((new Date() - date) / 1000);
+                let interval = seconds / 31536000;
+                if (interval > 1) return Math.floor(interval) + " years ago";
+                interval = seconds / 2592000;
+                if (interval > 1) return Math.floor(interval) + " months ago";
+                interval = seconds / 86400;
+                if (interval > 1) return Math.floor(interval) + " days ago";
+                interval = seconds / 3600;
+                if (interval > 1) return Math.floor(interval) + " hours ago";
+                interval = seconds / 60;
+                if (interval > 1) return Math.floor(interval) + " minutes ago";
+                return "just now";
+            },
+            renderMarkdown(md) {
+                if (!md) return '';
+                // Very simple regex markdown parser for demo purposes
+                let html = md
+                    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                    .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+                    .replace(/\*(.*)\*/gim, '<em>$1</em>')
+                    .replace(/\n/gim, '<br />');
+                return html;
+            },
+            sanitize(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            },
+            copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            }
+        };
+
+        // --- 3. View Renderers ---
+
+        const views = {
+            overview() {
+                const repos = store.currentUser.repositories;
+                const projects = store.currentUser.projects;
+                const popularRepo = [...repos].sort((a, b) => (b.stars || 0) - (a.stars || 0))[0];
+
+                // Contributions Graph Simulation (Static visual)
+                const contribSquares = Array(52).fill(0).map(() =>
+                    `<div class="w-2 h-2 rounded-sm bg-gray-200 dark:bg-[#21262d]" style="background-color: ${Math.random() > 0.7 ? '#39d353' : (Math.random() > 0.9 ? '#0e4429' : '')}"></div>`
+                ).join('');
+
+                return `
+                    <div class="space-y-6 fade-in">
+                        <!-- Portfolio Spotlight -->
+                        ${projects.length > 0 ? `
+                        <div class="mb-6">
+                            <h3 class="text-sm font-normal text-gray-900 dark:text-san-cream mb-2">Portfolio Spotlight</h3>
+                            <div class="grid grid-cols-1 gap-4">
+                                ${projects.slice(0, 1).map(p => `
+                                <div class="relative bg-white dark:bg-san-card border border-gray-200 dark:border-san-border rounded-lg overflow-hidden group cursor-pointer hover:border-san-gold transition-all shadow-lg" onclick="app.openPreview('${p.host_url}', '${p.title}')">
+                                    <div class="absolute inset-0 bg-gradient-to-r from-gray-900/90 to-gray-900/40 dark:from-san-dark/90 dark:to-san-dark/40 z-10"></div>
+                                    <div class="h-48 bg-gray-100 dark:bg-[#161b22] flex items-center justify-center relative">
+                                        <!-- Placeholder Pattern background -->
+                                        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#c47f00 1px, transparent 1px); background-size: 20px 20px;"></div>
+                                        <i data-lucide="monitor-play" class="w-16 h-16 text-san-gold opacity-20 group-hover:scale-110 group-hover:opacity-100 transition-all duration-500 relative z-0"></i>
+                                    </div>
+                                    <div class="absolute bottom-0 left-0 p-6 z-20 w-full">
+                                        <div class="flex justify-between items-end">
+                                            <div>
+                                                <span class="text-xs font-mono text-san-gold mb-1 block">LATEST WORK</span>
+                                                <h4 class="font-bold text-2xl text-white dark:text-san-cream group-hover:text-san-gold transition-colors">${p.title}</h4>
+                                                <p class="text-sm text-gray-300 dark:text-san-muted mt-1 max-w-md">${p.description}</p>
+                                            </div>
+                                            <button class="bg-gray-800 dark:bg-san-btn hover:bg-san-gold hover:text-black text-san-cream border border-gray-600 dark:border-san-border rounded-full p-2 transition-all">
+                                                <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        <!-- Pinned / Popular -->
+                        ${popularRepo ? `
+                        <div class="mb-6">
+                            <h3 class="text-sm font-normal text-gray-900 dark:text-san-cream mb-2">Popular Repository</h3>
+                            <div class="p-4 bg-white dark:bg-san-card border border-gray-200 dark:border-san-border rounded-md">
+                                <div class="flex justify-between items-start">
+                                    <a href="javascript:void(0)" onclick="app.openRepoDetail('${popularRepo.id}')" class="font-bold text-san-gold hover:underline">${popularRepo.name}</a>
+                                    <span class="text-xs border border-gray-300 dark:border-san-border px-2 py-0.5 rounded-full text-gray-500 dark:text-san-muted">Public</span>
+                                </div>
+                                <p class="text-sm text-gray-500 dark:text-san-muted mt-2">${popularRepo.description}</p>
+                                <div class="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-san-muted">
+                                    <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-yellow-400"></div> ${popularRepo.language}</span>
+                                    <span class="flex items-center gap-1"><i data-lucide="star" class="w-3 h-3"></i> ${popularRepo.stars || 0}</span>
+                                </div>
+                            </div>
+                        </div>` : ''}
+
+                        <!-- 3D Model Viewer (Replaces Contribution Graph) -->
+                        <div class="mb-6">
+                            <div class="flex justify-between items-end mb-2">
+                                <h3 class="text-sm font-normal text-gray-900 dark:text-san-cream">3D Asset Showcase</h3>
+                                <span class="text-xs text-gray-500 dark:text-san-muted">Supports .glb / .gltf</span>
+                            </div>
+                            <div id="model-container" class="border border-gray-200 dark:border-san-border rounded-md relative group overflow-hidden">
+                                <!-- The Canvas will be injected here -->
+                                <div id="canvas-placeholder" class="w-full h-full flex items-center justify-center text-gray-400 dark:text-san-muted flex-col gap-2 bg-gray-50 dark:bg-transparent">
+                                    <i data-lucide="box" class="w-8 h-8 opacity-50"></i>
+                                    <span class="text-xs">Loading 3D Engine...</span>
+                                </div>
+                                
+                                <!-- Upload Control -->
+                                ${store.data.currentUser !== 'default' ? `
+                                <div class="model-overlay opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <label class="cursor-pointer bg-white dark:bg-san-card border border-gray-200 dark:border-san-border text-xs px-3 py-2 rounded-md hover:border-san-gold hover:text-san-gold flex items-center gap-2 shadow-lg text-gray-700 dark:text-san-cream">
+                                        <i data-lucide="upload-cloud" class="w-3 h-3"></i> Load Your Model
+                                        <input type="file" id="glbUpload" accept=".glb,.gltf" class="hidden">
+                                    </label>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Activity Feed -->
+                        <div>
+                            <h3 class="text-sm font-normal text-gray-900 dark:text-san-cream mb-4 pb-2 border-b border-gray-200 dark:border-san-border">Activity</h3>
+                            <div class="space-y-0">
+                                ${store.currentUser.activity.map((act, idx) => `
+                                    <div class="flex gap-3 py-3 relative">
+                                        <div class="absolute left-[11px] top-8 bottom-0 w-0.5 bg-gray-200 dark:bg-san-border ${idx === store.currentUser.activity.length - 1 ? 'hidden' : ''}"></div>
+                                        <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-san-border flex items-center justify-center z-10 ring-4 ring-gray-50 dark:ring-san-dark">
+                                            <i data-lucide="${act.type === 'star' ? 'star' : (act.type === 'repo' ? 'git-branch' : 'zap')}" class="w-3 h-3 text-gray-500 dark:text-san-muted"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm text-gray-900 dark:text-san-cream">
+                                                <span class="text-gray-500 dark:text-san-muted">${utils.sanitize(act.type.toUpperCase())}:</span> ${utils.sanitize(act.text)}
+                                            </div>
+                                            <div class="text-xs text-gray-500 dark:text-san-muted mt-0.5">${utils.timeAgo(act.date)}</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                                ${store.currentUser.activity.length === 0 ? '<div class="text-gray-500 dark:text-san-muted text-sm">No recent activity.</div>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            repositories() {
+                const repos = store.currentUser.repositories;
+                const f = app.repoFilters;
+
+                let filtered = repos.filter(r => {
+                    const matchQuery = r.name.toLowerCase().includes(f.query.toLowerCase()) ||
+                        (r.description && r.description.toLowerCase().includes(f.query.toLowerCase()));
+                    const matchType = f.type === 'all' || (f.type === 'isStarred' && r.isStarred);
+                    const matchLang = f.language === 'all' || r.language === f.language;
+                    return matchQuery && matchType && matchLang;
+                });
+
+                // Sorting
+                filtered.sort((a, b) => {
+                    if (f.sort === 'name') return a.name.localeCompare(b.name);
+                    if (f.sort === 'stars') return (b.stars || 0) - (a.stars || 0);
+                    return new Date(b.updated_at) - new Date(a.updated_at);
+                });
+
+                const languages = ['all', ...new Set(repos.map(r => r.language).filter(Boolean))];
+
+                return `
+                    <div class="fade-in">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-gray-200 dark:border-san-border pb-6">
+                            <div class="flex-1 w-full">
+                                <input type="text" placeholder="Search repositories..." id="repoSearchInput"
+                                    class="bg-white dark:bg-san-card border border-gray-300 dark:border-san-border rounded-md px-3 py-2 text-sm text-gray-900 dark:text-san-cream w-full focus:border-san-gold outline-none"
+                                    oninput="app.updateRepoFilter('query', this.value)" value="${f.query}">
+                            </div>
+                            <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                                <select onchange="app.updateRepoFilter('type', this.value)" class="bg-gray-100 dark:bg-san-btn border border-gray-300 dark:border-san-border rounded-md px-3 py-1.5 text-xs font-bold text-gray-700 dark:text-san-cream outline-none cursor-pointer">
+                                    <option value="all" ${f.type === 'all' ? 'selected' : ''}>Type: All</option>
+                                    <option value="isStarred" ${f.type === 'isStarred' ? 'selected' : ''}>Type: Starred</option>
+                                </select>
+                                <select onchange="app.updateRepoFilter('language', this.value)" class="bg-gray-100 dark:bg-san-btn border border-gray-300 dark:border-san-border rounded-md px-3 py-1.5 text-xs font-bold text-gray-700 dark:text-san-cream outline-none cursor-pointer">
+                                    ${languages.map(l => `<option value="${l}" ${f.language === l ? 'selected' : ''}>Language: ${l === 'all' ? 'All' : l}</option>`).join('')}
+                                </select>
+                                <select onchange="app.updateRepoFilter('sort', this.value)" class="bg-gray-100 dark:bg-san-btn border border-gray-300 dark:border-san-border rounded-md px-3 py-1.5 text-xs font-bold text-gray-700 dark:text-san-cream outline-none cursor-pointer">
+                                    <option value="updated" ${f.sort === 'updated' ? 'selected' : ''}>Sort: Last Updated</option>
+                                    <option value="name" ${f.sort === 'name' ? 'selected' : ''}>Sort: Name</option>
+                                    <option value="stars" ${f.sort === 'stars' ? 'selected' : ''}>Sort: Stars</option>
+                                </select>
+                                ${store.data.currentUser !== 'default' ? `
+                                <button onclick="modal.open('repoModal')" class="bg-green-600 dark:bg-green-700 text-white px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-1 hover:bg-green-500 dark:hover:bg-green-600 transition-colors">
+                                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> New
+                                </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-0">
+                            ${filtered.map(repo => `
+                                <div class="py-6 border-b border-gray-200 dark:border-san-border hover:bg-gray-50/50 dark:hover:bg-[#161b22]/30 transition-colors group">
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <a href="javascript:void(0)" onclick="app.openRepoDetail('${repo.id}')" class="text-xl font-bold text-san-gold hover:underline break-all cursor-pointer">${utils.sanitize(repo.name)}</a>
+                                                <span class="text-[10px] border border-gray-300 dark:border-san-border px-2 py-0.5 rounded-full text-gray-500 dark:text-san-muted font-bold uppercase tracking-wider">Public</span>
+                                            </div>
+                                            <p class="text-gray-600 dark:text-san-muted text-sm mb-4 max-w-2xl">${utils.sanitize(repo.description || 'No description provided.')}</p>
+                                            <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-san-muted">
+                                                <span class="flex items-center gap-1.5">
+                                                    <div class="w-3 h-3 rounded-full bg-purple-500 border border-black/10"></div> 
+                                                    ${utils.sanitize(repo.language || 'Text')}
+                                                </span>
+                                                <span class="flex items-center gap-1 hover:text-san-gold cursor-pointer transition-colors" onclick="event.preventDefault(); app.starRepo('${repo.id}')">
+                                                    <i data-lucide="star" class="w-4 h-4" ${repo.isStarred ? 'fill="currentColor"' : ''}></i> 
+                                                    ${repo.stars || 0}
+                                                </span>
+                                                <span>Updated ${utils.timeAgo(repo.updated_at)}</span>
+                                            </div>
+                                        </div>
+                                        ${store.data.currentUser !== 'default' ? `
+                                        <div class="flex gap-2">
+                                            <button onclick="app.downloadZIP('${repo.id}')" class="p-1 px-2 border border-gray-300 dark:border-san-border rounded text-gray-500 hover:text-san-gold hover:border-san-gold transition-all" title="Download ZIP">
+                                                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                            </button>
+                                            <button onclick="app.openEditRepo('${repo.id}')" class="p-1 px-2 border border-gray-300 dark:border-san-border rounded text-gray-500 hover:text-san-gold hover:border-san-gold transition-all" title="Edit">
+                                                <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                                            </button>
+                                            <button onclick="app.deleteRepo('${repo.id}')" class="p-1 px-2 border border-gray-300 dark:border-san-border rounded text-gray-500 hover:text-red-500 hover:border-red-500 transition-all" title="Delete">
+                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                            </button>
+                                        </div>
+                                        ` : `
+                                        <button onclick="app.downloadZIP('${repo.id}')" class="p-1 px-2 border border-gray-300 dark:border-san-border rounded text-gray-500 hover:text-san-gold hover:border-san-gold transition-all" title="Download ZIP">
+                                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                        `}
+                                    </div>
+                                </div>
+                            `).join('')}
+                            ${filtered.length === 0 ? '<div class="py-20 text-center text-gray-500 dark:text-san-muted flex flex-col items-center gap-3"><i data-lucide="search" class="w-12 h-12 opacity-20"></i> <div class="text-lg font-bold">No repositories found</div><div class="text-sm">Try adjusting your filters or search query.</div></div>' : ''}
+                        </div>
+                    </div>
+                `;
+            },
+
+            projects() {
+                const projects = store.currentUser.projects;
+                return `
+                    <div class="fade-in">
+                         <div class="flex justify-between items-center mb-6">
+                            <h2 class="font-bold text-lg text-gray-900 dark:text-san-cream">Hosted Projects</h2>
+                            ${store.data.currentUser !== 'default' ? `
+                            <button onclick="modal.open('projectModal')" class="bg-white dark:bg-san-btn border border-gray-300 dark:border-san-border text-gray-900 dark:text-san-cream px-3 py-1 rounded-md text-sm font-bold hover:border-san-gold">Add Project</button>
+                            ` : ''}
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            ${projects.map(proj => `
+                                <div class="bg-white dark:bg-san-card border border-gray-200 dark:border-san-border rounded-lg overflow-hidden hover:border-gray-400 dark:hover:border-san-muted transition-colors flex flex-col h-full group relative">
+                                    <!-- Browser-like Header -->
+                                    <div class="bg-gray-100 dark:bg-[#161b22] p-2 border-b border-gray-200 dark:border-san-border flex items-center justify-between">
+                                        <div class="flex items-center gap-1.5 pl-1">
+                                            <div class="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+                                            <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></div>
+                                            <div class="w-2.5 h-2.5 rounded-full bg-green-500/80"></div>
+                                        </div>
+                                        <div class="flex-1 px-4">
+                                            <div class="bg-white dark:bg-san-dark border border-gray-200 dark:border-san-border rounded-md py-0.5 px-2 text-[10px] text-gray-400 dark:text-san-muted truncate text-center">
+                                                ${proj.host_url.replace('https://', '')}
+                                            </div>
+                                        </div>
+                                        ${store.data.currentUser !== 'default' ? `
+                                        <div class="flex gap-2">
+                                            <button onclick="app.openEditProject('${proj.id}')" class="text-gray-500 hover:text-san-gold transition-colors">
+                                                <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                                            </button>
+                                            <button onclick="app.deleteProject('${proj.id}')" class="text-gray-500 hover:text-red-500 transition-colors">
+                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                            </button>
+                                        </div>
+                                        ` : '<div class="w-10"></div>'}
+                                    </div>
+
+                                    <!-- Live Preview Window -->
+                                    <div class="aspect-video relative overflow-hidden bg-gray-50 dark:bg-black border-b border-gray-200 dark:border-san-border">
+                                        <iframe src="${proj.host_url}" 
+                                                class="w-full h-full border-none pointer-events-none scale-100 origin-top" 
+                                                loading="lazy">
+                                        </iframe>
+                                        <!-- Overlay to intercept clicks and open modal -->
+                                        <div class="absolute inset-0 cursor-pointer z-10 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                             onclick="app.openPreview('${proj.host_url}', '${proj.title}')">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="p-4 flex-1 flex flex-col">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <h3 class="font-bold text-gray-900 dark:text-san-cream text-lg">${utils.sanitize(proj.title)}</h3>
+                                        </div>
+                                        <p class="text-sm text-gray-600 dark:text-san-muted mb-4 flex-1">${utils.sanitize(proj.description || '')}</p>
+                                        
+                                        <div class="flex flex-wrap gap-1 mb-4">
+                                            ${(proj.tags || []).map(t => `<span class="text-xs bg-gray-100 dark:bg-san-btn px-2 py-1 rounded text-san-gold">#${t}</span>`).join('')}
+                                        </div>
+
+                                        <div class="flex gap-2 mt-auto">
+                                            <button onclick="app.openPreview('${proj.host_url}', '${proj.title}')" class="flex-1 bg-green-600 dark:bg-green-700 text-white py-1.5 rounded text-sm font-medium hover:bg-green-500 dark:hover:bg-green-600 transition-colors flex items-center justify-center gap-2">
+                                                <i data-lucide="play" class="w-3 h-3"></i> Open Demo
+                                            </button>
+                                            <a href="${proj.host_url}" target="_blank" class="px-3 py-1.5 border border-gray-300 dark:border-san-border rounded text-gray-500 dark:text-san-muted hover:text-san-gold">
+                                                <i data-lucide="external-link" class="w-4 h-4"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                            ${projects.length === 0 ? '<div class="col-span-full py-20 text-center text-gray-500">No projects added yet.</div>' : ''}
+                        </div>
+                    </div>
+                `;
+            },
+
+            packages() {
+                return `
+                    <div class="fade-in py-12 text-center border border-dashed border-gray-300 dark:border-san-border rounded-lg bg-gray-50 dark:bg-san-dark/30">
+                        <div class="w-20 h-20 bg-gray-200 dark:bg-san-btn rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i data-lucide="package" class="w-10 h-10 text-gray-400 dark:text-san-muted"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-san-cream mb-2">Get started with Packages</h2>
+                        <p class="text-gray-500 dark:text-san-muted max-w-md mx-auto mb-8">
+                            A software package is a way to group and share code. SanHub Packages lets you host and manage your own packages.
+                        </p>
+                        <button class="bg-gray-800 dark:bg-san-btn text-white px-6 py-2 rounded-md font-bold hover:bg-black transition-all border border-gray-700 dark:border-san-border">
+                            Learn more about Packages
+                        </button>
+                    </div>
+                `;
+            },
+
+            repoHub(repoId) {
+                const repo = store.currentUser.repositories.find(r => r.id === repoId);
+                if (!repo) return `<div class="p-20 text-center text-gray-500">Repository not found.</div>`;
+
+                const subTab = app.repoSubTab;
+
+                return `
+                    <div class="fade-in max-w-6xl mx-auto">
+                        <!-- Repo Header -->
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="book" class="w-5 h-5 text-gray-500"></i>
+                                <span class="text-xl text-blue-500 dark:text-blue-400 font-bold hover:underline cursor-pointer">${store.currentUser.meta.owner}</span>
+                                <span class="text-xl text-gray-400">/</span>
+                                <span class="text-xl font-bold text-san-gold dark:text-san-cream">${repo.name}</span>
+                                <span class="text-[10px] border border-gray-300 dark:border-san-border px-2 py-0.5 rounded-full text-gray-500 dark:text-san-muted font-bold uppercase ml-2">Public</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="app.downloadZIP('${repo.id}')" class="flex items-center gap-2 bg-san-gold hover:bg-san-goldHover text-black px-3 py-1.5 rounded-md text-xs font-bold transition-all">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i> Download ZIP
+                                </button>
+                                <button onclick="app.starRepo('${repo.id}')" class="flex items-center gap-2 bg-gray-100 dark:bg-san-btn border border-gray-300 dark:border-san-border px-3 py-1.5 rounded-md text-xs font-bold hover:bg-gray-200 dark:hover:bg-san-border transition-all">
+                                    <i data-lucide="star" class="w-3.5 h-3.5" ${repo.isStarred ? 'fill="currentColor"' : ''}></i> 
+                                    ${repo.isStarred ? 'Starred' : 'Star'}
+                                    <span class="bg-gray-200 dark:bg-san-dark px-1.5 rounded-full text-[10px] ml-1">${repo.stars || 0}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Sub Tabs -->
+                        <div class="flex items-center gap-6 border-b border-gray-200 dark:border-san-border mb-6">
+                            ${['code', 'issues', 'pulls', 'commits'].map(t => `
+                                <button onclick="app.switchRepoTab('${t}')" 
+                                    class="flex items-center gap-2 pb-3 text-sm transition-all border-b-2 ${subTab === t ? 'border-san-gold text-gray-900 dark:text-san-cream font-bold' : 'border-transparent text-gray-500 dark:text-san-muted hover:text-gray-900 dark:hover:text-san-cream'}">
+                                    <i data-lucide="${t === 'code' ? 'code' : (t === 'issues' ? 'circle-dot' : (t === 'pulls' ? 'git-pull-request' : 'history'))}" class="w-4 h-4"></i>
+                                    ${t.charAt(0).toUpperCase() + t.slice(1)}
+                                    ${t === 'issues' ? `<span class="bg-gray-200 dark:bg-san-btn px-2 rounded-full text-[10px]">${repo.issues?.length || 0}</span>` : ''}
+                                </button>
+                            `).join('')}
+                        </div>
+
+                        <!-- Context View -->
+                        <div class="fade-in">
+                            ${subTab === 'code' ? this.renderRepoCode(repo) : ''}
+                            ${subTab === 'issues' ? this.renderRepoIssues(repo) : ''}
+                            ${subTab === 'commits' ? this.renderRepoCommits(repo) : ''}
+                            ${subTab === 'pulls' ? `<div class="py-20 text-center text-gray-500 flex flex-col items-center gap-3"><i data-lucide="git-pull-request" class="w-16 h-16 opacity-10"></i><div class="text-xl font-bold">No Pull Requests</div><p class="text-sm">Collaborate on this project by opening a PR.</p></div>` : ''}
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderRepoCode(repo) {
+                return `
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="md:col-span-3 space-y-4">
+                            <!-- Branch selector -->
+                            <div class="flex items-center gap-2 mb-4">
+                                <button class="bg-gray-100 dark:bg-san-btn border border-gray-300 dark:border-san-border px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-2">
+                                    <i data-lucide="git-branch" class="w-3.5 h-3.5"></i> main <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <span class="text-xs text-gray-500 ml-2"><strong>${repo.commits?.length || 0}</strong> commits</span>
+                            </div>
+
+                            <!-- File Explorer -->
+                            <div class="border border-gray-200 dark:border-san-border rounded-lg overflow-hidden bg-white dark:bg-san-card shadow-sm">
+                                <div class="bg-gray-50 dark:bg-[#161b22] px-4 py-3 border-b border-gray-200 dark:border-san-border flex items-center justify-between text-xs text-gray-500 dark:text-san-muted">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-san-btn flex items-center justify-center">
+                                            <i data-lucide="user" class="w-3 h-3"></i>
+                                        </div>
+                                        <span class="font-bold text-gray-700 dark:text-san-cream">${repo.commits?.[0]?.author || 'User'}</span>
+                                        <span class="hover:underline cursor-pointer">${repo.commits?.[0]?.message || 'Update'}</span>
+                                    </div>
+                                    <span>${utils.timeAgo(repo.commits?.[0]?.date || new Date())}</span>
+                                </div>
+                                <div class="divide-y divide-gray-100 dark:divide-san-border">
+                                    ${(repo.files || []).map(f => `
+                                        <div class="px-4 py-2.5 flex items-center justify-between group hover:bg-gray-50 dark:hover:bg-san-btn cursor-pointer transition-colors">
+                                            <div class="flex items-center gap-3">
+                                                <i data-lucide="${f.type === 'dir' ? 'folder' : 'file-text'}" class="w-4 h-4 ${f.type === 'dir' ? 'text-blue-400' : 'text-gray-400'}"></i>
+                                                <span class="text-sm text-gray-800 dark:text-san-cream group-hover:text-blue-500 transition-colors">${f.name}</span>
+                                            </div>
+                                            <div class="flex items-center gap-8">
+                                                <span class="text-xs text-gray-400 dark:text-san-muted hidden md:block">Initial Commit</span>
+                                                <span class="text-xs text-gray-400 dark:text-san-muted w-24 text-right">${f.size || ''}</span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <!-- README -->
+                            <div class="border border-gray-200 dark:border-san-border rounded-lg overflow-hidden bg-white dark:bg-san-card shadow-sm mt-6">
+                                <div class="bg-gray-50 dark:bg-[#161b22] px-4 py-2 border-b border-gray-200 dark:border-san-border flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-san-cream">
+                                    <i data-lucide="list" class="w-4 h-4"></i> README.md
+                                </div>
+                                <div class="p-8 md-preview">
+                                    ${utils.markdown(repo.readme || '# No README')}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar -->
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-san-cream mb-2">About</h3>
+                                <p class="text-sm text-gray-600 dark:text-san-muted mb-4">${repo.description || 'No description provided.'}</p>
+                                
+                                <div class="bg-gray-50 dark:bg-san-btn/30 border border-gray-200 dark:border-san-border rounded-lg p-3 mb-4 text-[11px] leading-relaxed text-gray-500 dark:text-san-muted italic">
+                                    <p class="mb-2">Repositories store project files, track version history, enable collaboration, and manage issues. They provide easy download options via Git cloning or direct ZIP files.</p>
+                                    <p>Overall, a repository helps organize project files, track progress, support collaboration, and provide easy access for developers and users.</p>
+                                </div>
+
+                                <div class="mt-4 flex flex-wrap gap-2">
+                                    ${(repo.tags || []).map(t => `<span class="bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full text-[10px] font-bold">#${t}</span>`).join('')}
+                                </div>
+                            </div>
+                            <div class="border-t border-gray-100 dark:border-san-border pt-4">
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-san-cream mb-2">Releases</h3>
+                                <div class="text-xs text-gray-500">No releases published.</div>
+                            </div>
+                            <div class="border-t border-gray-100 dark:border-san-border pt-4">
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-san-cream mb-2">Languages</h3>
+                                <div class="space-y-2">
+                                    <div class="flex h-2 rounded-full overflow-hidden">
+                                        <div class="bg-yellow-400" style="width: 100%"></div>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-xs">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
+                                        <span class="font-bold text-gray-700 dark:text-san-cream">${repo.language}</span>
+                                        <span class="text-gray-500">100%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderRepoIssues(repo) {
+                return `
+                    <div class="border border-gray-200 dark:border-san-border rounded-lg overflow-hidden bg-white dark:bg-san-card shadow-sm">
+                        <div class="bg-gray-50 dark:bg-[#161b22] px-4 py-3 border-b border-gray-200 dark:border-san-border flex items-center justify-between text-xs font-bold">
+                            <div class="flex items-center gap-4">
+                                <span class="flex items-center gap-1.5 text-gray-900 dark:text-san-cream"><i data-lucide="circle-dot" class="w-4 h-4"></i> ${repo.issues?.filter(i => i.status === 'open').length || 0} Open</span>
+                                <span class="flex items-center gap-1.5 text-gray-400 dark:text-san-muted font-normal"><i data-lucide="check" class="w-4 h-4"></i> ${repo.issues?.filter(i => i.status === 'closed').length || 0} Closed</span>
+                            </div>
+                        </div>
+                        <div class="divide-y divide-gray-100 dark:divide-san-border">
+                            ${(repo.issues || []).map(iss => `
+                                <div class="px-4 py-4 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-san-btn cursor-pointer transition-colors group">
+                                    <i data-lucide="circle-dot" class="w-4 h-4 mt-0.5 ${iss.status === 'open' ? 'text-green-500' : 'text-purple-500'}"></i>
+                                    <div>
+                                        <div class="text-sm font-bold text-gray-900 dark:text-san-cream group-hover:text-blue-500 transition-colors">${iss.title}</div>
+                                        <div class="text-[11px] text-gray-500 dark:text-san-muted mt-1">#${iss.id} opened ${utils.timeAgo(iss.date)} by SanUser</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                            ${(!repo.issues || repo.issues.length === 0) ? '<div class="py-20 text-center text-gray-500">No issues found.</div>' : ''}
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderRepoCommits(repo) {
+                return `
+                    <div class="space-y-8">
+                        <div>
+                            <div class="flex items-center gap-2 mb-4 text-xs font-bold text-gray-500">
+                                <i data-lucide="calendar" class="w-4 h-4"></i> Commits on Feb 20, 2026
+                            </div>
+                            <div class="border border-gray-200 dark:border-san-border rounded-lg overflow-hidden bg-white dark:bg-san-card shadow-sm divide-y divide-gray-100 dark:divide-san-border">
+                                ${(repo.commits || []).map(c => `
+                                    <div class="px-4 py-3 flex items-center justify-between group hover:bg-gray-50 dark:hover:bg-san-btn cursor-pointer transition-colors">
+                                        <div class="flex items-start gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-san-btn flex items-center justify-center mt-1">
+                                                <i data-lucide="user" class="w-4 h-4"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-bold text-gray-800 dark:text-san-cream group-hover:text-blue-500 transition-colors">${c.message}</div>
+                                                <div class="text-xs text-gray-500 dark:text-san-muted">${c.author} committed ${utils.timeAgo(c.date)}</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <code class="text-[10px] bg-gray-100 dark:bg-san-dark border border-gray-200 dark:border-san-border px-2 py-0.5 rounded text-blue-500">${c.id}</code>
+                                            <button class="p-1.5 border border-gray-300 dark:border-san-border rounded hover:border-san-gold transition-colors text-gray-500">
+                                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            stars() {
+                const repos = store.currentUser.repositories.filter(r => r.isStarred);
+                return `
+                    <div class="fade-in">
+                        <h2 class="font-bold text-lg mb-6 text-gray-900 dark:text-san-cream">Starred Repositories (${repos.length})</h2>
+                        <div class="space-y-4">
+                            ${repos.map(repo => `
+                                <div class="p-4 bg-white dark:bg-san-card border border-gray-200 dark:border-san-border rounded-lg group hover:border-san-gold transition-colors">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <a href="#repositories/${repo.id}" class="font-bold text-san-gold hover:underline text-lg">${utils.sanitize(repo.name)}</a>
+                                            <p class="text-sm text-gray-500 dark:text-san-muted mt-1">${utils.sanitize(repo.description || '')}</p>
+                                        </div>
+                                        <button onclick="app.starRepo('${repo.id}')" class="bg-gray-100 dark:bg-san-btn border border-gray-200 dark:border-san-border px-3 py-1 rounded text-xs font-bold flex items-center gap-1 hover:bg-gray-200 dark:hover:bg-san-border">
+                                            <i data-lucide="star" class="w-3 h-3 ${repo.isStarred ? 'fill-current' : ''}"></i> Starred
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center gap-4 mt-4 text-xs text-gray-500 dark:text-san-muted">
+                                        <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-yellow-400"></div> ${repo.language}</span>
+                                        <span class="flex items-center gap-1"><i data-lucide="star" class="w-3 h-3"></i> ${repo.stars}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                            ${repos.length === 0 ? '<div class="py-12 text-center text-gray-500 dark:text-san-muted">You haven\'t starred any repositories yet.</div>' : ''}
+                        </div>
+                    </div>
+                `;
+            }
+        };
+
+        // --- 3.5 Policy Content Data ---
+        const POLICY_DATA = {
+            terms: {
+                title: '📄 Terms of Service',
+                icon: 'file-text',
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-xs text-san-muted">Last Updated: [20-02-2026]</p>
+                        <p>SanHub is a local repository management platform designed to help users store, manage, and collaborate on projects securely within a controlled environment.</p>
+                        <p>By using SanHub, you agree to the following:</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><strong>Responsibility:</strong> Users are responsible for the content they upload and manage.</li>
+                            <li><strong>Legal Use:</strong> SanHub must not be used for illegal, harmful, or unauthorized activities.</li>
+                            <li><strong>Performance:</strong> Users must not attempt to disrupt system performance or gain unauthorized access.</li>
+                            <li><strong>Ownership:</strong> Project data remains the responsibility of the project owner.</li>
+                            <li><strong>Suspension:</strong> The platform administrators may suspend access if misuse is detected.</li>
+                        </ul>
+                        <p class="pt-2 italic">SanHub is provided as a productivity tool to support safe and efficient project management.</p>
+                    </div>
+                `
+            },
+            privacy: {
+                title: '🔒 Privacy Policy',
+                icon: 'lock',
+                content: `
+                    <div class="space-y-4">
+                        <p class="font-bold text-san-gold">Your privacy is our priority.</p>
+                        <p>SanHub is designed to operate on a local server environment, ensuring maximum data privacy.</p>
+                        <div>
+                            <h4 class="font-bold mb-2">What We Collect</h4>
+                            <ul class="list-disc pl-5">
+                                <li>User account information (if login is enabled)</li>
+                                <li>Project metadata (name, timestamps, activity logs)</li>
+                                <li>System logs for performance monitoring</li>
+                            </ul>
+                        </div>
+                        <div class="bg-gray-100 dark:bg-san-btn/50 p-4 rounded-lg">
+                            <h4 class="font-bold mb-2">What We DO NOT Collect</h4>
+                            <ul class="space-y-1">
+                                <li>✅ No external data sharing</li>
+                                <li>✅ No tracking cookies</li>
+                                <li>✅ No third-party analytics</li>
+                                <li>✅ No cloud data transmission</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-2">Data Storage</h4>
+                            <p>All data is stored locally within your server environment and remains under your control.</p>
+                        </div>
+                    </div>
+                `
+            },
+            security: {
+                title: '🛡 Security Policy',
+                icon: 'shield',
+                content: `
+                    <div class="space-y-4">
+                        <p>SanHub is built with security as a core principle.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="border border-san-border p-4 rounded-lg">
+                                <h4 class="font-bold text-san-gold mb-2">Security Features</h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>✔ Local server storage</li>
+                                    <li>✔ Role-based access control</li>
+                                    <li>✔ Secure authentication</li>
+                                    <li>✔ Unauthorized access protection</li>
+                                    <li>✔ Regular activity logging</li>
+                                </ul>
+                            </div>
+                            <div class="border border-san-border p-4 rounded-lg">
+                                <h4 class="font-bold text-san-gold mb-2">User Responsibilities</h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>• Use strong passwords</li>
+                                    <li>• Restrict server access</li>
+                                    <li>• Maintain regular backups</li>
+                                    <li>• Keep system updated</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="text-sm bg-blue-500/10 border-l-4 border-blue-500 p-3 italic">
+                            SanHub administrators should monitor system logs to ensure secure operation.
+                        </p>
+                    </div>
+                `
+            },
+            status: {
+                title: '📊 System Status',
+                icon: 'activity',
+                content: `
+                    <div class="space-y-6">
+                        <p>SanHub is designed for reliable local performance.</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-3 bg-green-500/10 border border-green-500/20 rounded flex items-center gap-3">
+                                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                                <span class="text-sm font-bold">System Operational</span>
+                            </div>
+                            <div class="p-3 bg-green-500/10 border border-green-500/20 rounded flex items-center gap-3">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span class="text-sm font-bold">Repositories Active</span>
+                            </div>
+                            <div class="p-3 bg-green-500/10 border border-green-500/20 rounded flex items-center gap-3">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span class="text-sm font-bold">Storage Active</span>
+                            </div>
+                            <div class="p-3 bg-green-500/10 border border-green-500/20 rounded flex items-center gap-3">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span class="text-sm font-bold">Security Enabled</span>
+                            </div>
+                        </div>
+                        <div class="text-sm space-y-2">
+                            <h4 class="font-bold underline">Performance Notes</h4>
+                            <p>• Performance depends on local server hardware.</p>
+                            <p>• Regular backups are recommended.</p>
+                            <p>• Ensure sufficient storage for project growth.</p>
+                        </div>
+                        <p class="text-xs text-san-muted border-t border-san-border pt-4">For technical issues, contact your system administrator.</p>
+                    </div>
+                `
+            }
+        };
+
+        // --- 4. Main App Logic ---
+
+        const app = {
+            currentTab: 'overview',
+            pendingSwitchId: null,
+            repoFilters: {
+                query: '',
+                type: 'all',
+                language: 'all',
+                sort: 'updated'
+            },
+            repoSubTab: 'code',
+            currentRepoId: null,
+
+            start() {
+                store.init();
+                this.updateProfileUI();
+                this.setupRouter();
+                this.setupEventListeners();
+                this.typingEffect();
+
+                // Handle initial load
+                if (!window.location.hash) window.location.hash = '#overview';
+                this.handleRoute();
+            },
+
+            switchRepoTab(tab) {
+                this.repoSubTab = tab;
+                this.render();
+            },
+
+            updateProfileUI() {
+                const meta = store.currentUser.meta;
+                const isDefaultUser = store.data.currentUser === 'default';
+
+                document.getElementById('profileName').textContent = meta.displayName;
+                document.getElementById('profileOwner').textContent = meta.owner;
+                document.getElementById('profileAvatar').src = meta.avatar || '1.jpg';
+
+                // Hide edit options for default profile
+                const editBtn = document.getElementById('editProfileBtn');
+                const avatarLabel = document.getElementById('avatarUploadLabel');
+                if (editBtn) editBtn.style.display = isDefaultUser ? 'none' : 'flex';
+                if (avatarLabel) avatarLabel.style.display = isDefaultUser ? 'none' : 'block';
+
+                // Header Dropdown management
+                const headerNewRepo = document.getElementById('headerNewRepo');
+                const headerNewProject = document.getElementById('headerNewProject');
+                const headerDivider = document.getElementById('headerDivider');
+
+                if (headerNewRepo) headerNewRepo.style.display = isDefaultUser ? 'none' : 'block';
+                if (headerNewProject) headerNewProject.style.display = isDefaultUser ? 'none' : 'block';
+                if (headerDivider) headerDivider.style.display = isDefaultUser ? 'none' : 'block';
+
+                // Hide export/import for default user
+                const headerExport = document.getElementById('headerExport');
+                const headerImport = document.getElementById('headerImport');
+                const headerDivider2 = document.getElementById('headerDivider2');
+
+                if (headerExport) headerExport.style.display = isDefaultUser ? 'none' : 'block';
+                if (headerImport) headerImport.style.display = isDefaultUser ? 'none' : 'block';
+                if (headerDivider2) headerDivider2.style.display = isDefaultUser ? 'none' : 'block';
+
+                // Render Contact Links dynamically
+                const linksContainer = document.getElementById('profileLinks');
+                const c = meta.contact;
+
+                linksContainer.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="building-2" class="w-4 h-4"></i>
+                        <span class="text-gray-900 dark:text-san-cream">${meta.owner}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="map-pin" class="w-4 h-4"></i>
+                        <span>${c.location}</span>
+                    </div>
+                    <div class="flex items-center gap-2 overflow-hidden">
+                        <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>
+                        <a href="mailto:${c.email}" class="hover:text-san-gold truncate underline decoration-dotted">${c.email}</a>
+                    </div>
+                    <div class="flex items-center gap-2 overflow-hidden">
+                        <i data-lucide="link" class="w-4 h-4 flex-shrink-0"></i>
+                        <a href="${c.website}" target="_blank" class="hover:text-san-gold truncate text-blue-500 dark:text-blue-400">${c.website.replace('https://', '')}</a>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="instagram" class="w-4 h-4"></i>
+                        <a href="https://instagram.com/${c.instagram}" target="_blank" class="hover:text-san-gold">${c.instagram}</a>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="facebook" class="w-4 h-4"></i>
+                        <a href="https://facebook.com/${c.facebook}" target="_blank" class="hover:text-san-gold">${c.facebook}</a>
+                    </div>
+                    <div class="flex items-center gap-2 overflow-hidden">
+                        <i data-lucide="linkedin" class="w-4 h-4 flex-shrink-0"></i>
+                        <a href="https://linkedin.com/in/${c.linkedin}" target="_blank" class="hover:text-san-gold truncate">in/${c.linkedin}</a>
+                    </div>
+                     <div class="flex items-center gap-2 overflow-hidden">
+                        <i data-lucide="youtube" class="w-4 h-4 flex-shrink-0"></i>
+                        <a href="${c.youtube}" target="_blank" class="hover:text-san-gold truncate">YouTube Channel</a>
+                    </div>
+                `;
+
+                // Refresh icons for new elements
+                if (window.lucide) lucide.createIcons();
+
+                // Update Avatars
+                if (meta.avatar) {
+                    document.getElementById('headerAvatar').src = meta.avatar;
+                    document.getElementById('profileAvatar').src = meta.avatar;
+                }
+
+                // Badges/Skills
+                document.getElementById('skillTags').innerHTML = meta.skills.map(s =>
+                    `<span class="text-xs bg-gray-200 dark:bg-san-btn text-san-gold border border-gray-300 dark:border-san-border px-2 py-1 rounded-full">${s}</span>`
+                ).join('');
+
+                document.getElementById('repoCountBadge').textContent = store.currentUser.repositories.length;
+
+                // Update WhatsApp link
+                const wa = document.getElementById('whatsappLink');
+                if (wa) {
+                    wa.href = `https://wa.me/${meta.contact.whatsapp.replace('+', '')}`;
+                }
+            },
+
+            // New method for Avatar upload
+            updateAvatar(input) {
+                const file = input.files[0];
+                if (!file) return;
+
+                // Max size check (2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert("Image is too large. Please choose an image under 2MB.");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64 = e.target.result;
+                    store.currentUser.meta.avatar = base64;
+                    store.save();
+                    this.updateProfileUI();
+                };
+                reader.readAsDataURL(file);
+            },
+
+            typingEffect() {
+                const text = store.currentUser.meta.bio;
+                const el = document.getElementById('profileBio');
+                let i = 0;
+                el.textContent = '';
+                // Clear any existing interval if we re-run this
+                if (this.typeInterval) clearInterval(this.typeInterval);
+                const type = () => {
+                    if (i < text.length) {
+                        el.textContent += text.charAt(i);
+                        i++;
+                        this.typeInterval = setTimeout(type, 50);
+                    } else {
+                        el.classList.remove('typing-cursor');
+                    }
+                };
+                type();
+            },
+
+            setupRouter() {
+                window.addEventListener('hashchange', () => this.handleRoute());
+            },
+
+            handleRoute() {
+                const fullHash = window.location.hash.replace('#', '') || 'overview';
+                const parts = fullHash.split('/');
+                this.currentTab = parts[0];
+                this.currentRepoId = parts[1] || null;
+
+                // UI Toggle for main tabs
+                document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('tab-active'));
+                const activeTabEl = document.getElementById(`tab-${this.currentTab}`);
+                if (activeTabEl) activeTabEl.classList.add('tab-active');
+
+                // Toggle sidebar visibility on mobile
+                const sidebar = document.getElementById('profileSidebar');
+                if (sidebar) {
+                    if (this.currentTab === 'overview' && !this.currentRepoId) {
+                        sidebar.classList.remove('hidden');
+                    } else {
+                        sidebar.classList.add('hidden');
+                    }
+                }
+
+                this.render();
+
+                // Initialize 3D if on overview
+                if (this.currentTab === 'overview') {
+                    // Small timeout to ensure DOM is ready
+                    setTimeout(() => {
+                        if (window.initSanHub3D) window.initSanHub3D();
+                    }, 100);
+                }
+            },
+
+            render() {
+                const container = document.getElementById('router-view');
+
+                if (this.currentRepoId) {
+                    container.innerHTML = views.repoHub(this.currentRepoId);
+                } else if (views[this.currentTab]) {
+                    container.innerHTML = views[this.currentTab]();
+                }
+
+                if (window.lucide) lucide.createIcons();
+            },
+
+            renderRepositories() {
+                if (this.currentTab === 'repositories') {
+                    this.render();
+                }
+            },
+
+            updateRepoFilter(key, value) {
+                this.repoFilters[key] = value;
+                this.renderRepositories();
+            },
+
+            starRepo(id) {
+                if (store.toggleStar(id)) {
+                    this.render();
+                }
+            },
+
+            openEditRepo(id) {
+                const repo = store.currentUser.repositories.find(r => r.id === id);
+                if (!repo) return;
+                const f = document.getElementById('editRepoForm');
+                f.id.value = repo.id;
+                f.name.value = repo.name;
+                f.description.value = repo.description || '';
+                f.language.value = repo.language || '';
+                f.readme.value = repo.readme || '';
+                modal.open('editRepoModal');
+            },
+
+            deleteRepo(id) {
+                if (confirm("Are you sure you want to delete this repository? This action cannot be undone.")) {
+                    if (store.deleteRepo(id)) {
+                        this.render();
+                    }
+                }
+            },
+
+            openEditProject(id) {
+                const proj = store.currentUser.projects.find(p => p.id === id);
+                if (!proj) return;
+                const f = document.getElementById('editProjectForm');
+                f.id.value = proj.id;
+                f.title.value = proj.title;
+                f.host_url.value = proj.host_url || '';
+                f.description.value = proj.description || '';
+                modal.open('editProjectModal');
+            },
+
+            deleteProject(id) {
+                if (confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
+                    if (store.deleteProject(id)) {
+                        this.render();
+                    }
+                }
+            },
+
+            openPreview(url, title) {
+                document.getElementById('previewTitle').textContent = title;
+                document.getElementById('previewLink').href = url;
+                document.getElementById('fallbackLink').href = url;
+
+                const iframe = document.getElementById('projectIframe');
+                const fallback = document.getElementById('iframeFallback');
+
+                iframe.src = url;
+                iframe.onload = () => {
+                    // Simple check, though many x-frame blocks are silent
+                    fallback.classList.add('hidden');
+                };
+                iframe.onerror = () => {
+                    fallback.classList.remove('hidden');
+                }
+
+                modal.open('previewModal');
+            },
+
+            exportData() {
+                const dataStr = JSON.stringify(store.data, null, 2);
+                const blob = new Blob([dataStr], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `sanhub-backup-${new Date().toISOString().slice(0, 10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            },
+
+            importData(input) {
+                const file = input.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const json = JSON.parse(e.target.result);
+                        if (json.repositories && json.meta) {
+                            // Handle legacy import
+                            store.data = {
+                                currentUser: 'default',
+                                users: { 'default': json }
+                            };
+                            store.save();
+                            window.location.reload();
+                        } else if (json.users && json.currentUser) {
+                            // Handle new format import
+                            store.data = json;
+                            store.save();
+                            window.location.reload();
+                        } else {
+                            alert('Invalid JSON structure');
+                        }
+                    } catch (err) {
+                        alert('Error parsing JSON');
+                    }
+                };
+                reader.readAsText(file);
+            },
+
+            async downloadZIP(repoId) {
+                const repo = store.currentUser.repositories.find(r => r.id === repoId);
+                if (!repo) return;
+
+                const zip = new JSZip();
+
+                // Helper to add files recursively
+                const addFilesToZip = (folder, files) => {
+                    files.forEach(file => {
+                        if (file.type === 'dir') {
+                            const subFolder = folder.folder(file.name);
+                            addFilesToZip(subFolder, file.children || []);
+                        } else {
+                            folder.file(file.name, file.content || '');
+                        }
+                    });
+                };
+
+                // Add README
+                zip.file("README.md", repo.readme || '');
+
+                // Add actual files
+                if (repo.files) {
+                    addFilesToZip(zip, repo.files);
+                }
+
+                try {
+                    const content = await zip.generateAsync({ type: "blob" });
+                    const url = URL.createObjectURL(content);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = `${repo.name}.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 100);
+                } catch (err) {
+                    console.error("ZIP Generation Error:", err);
+                    alert("Failed to generate ZIP file.");
+                }
+            },
+
+            openRepoDetail(id) {
+                const repo = store.currentUser.repositories.find(r => r.id === id);
+                if (!repo) return;
+
+                document.getElementById('detailRepoName').textContent = repo.name;
+                document.getElementById('detailRepoDesc').textContent = repo.description || 'No description provided.';
+                document.getElementById('detailRepoLang').innerHTML = `
+                    <div class="w-2 h-2 rounded-full bg-yellow-400"></div> ${repo.language || 'Text'}
+                `;
+
+                const linkEl = document.getElementById('detailRepoLink');
+                if (repo.live_url) {
+                    linkEl.href = repo.live_url;
+                    linkEl.innerHTML = `<i data-lucide="external-link" class="w-3.5 h-3.5"></i> Visit Site`;
+                    linkEl.classList.remove('opacity-50', 'pointer-events-none');
+                } else {
+                    linkEl.href = '#';
+                    linkEl.innerHTML = `No Live Link`;
+                    linkEl.classList.add('opacity-50', 'pointer-events-none');
+                }
+
+                document.getElementById('detailRepoSource').textContent = repo.source_code || '// No source code provided for this repository.';
+
+                const hubBtn = document.getElementById('goToRepoHub');
+                hubBtn.onclick = () => {
+                    modal.close('repoDetailModal');
+                    window.location.hash = `#repositories/${repo.id}`;
+                };
+
+                if (window.lucide) lucide.createIcons();
+                modal.open('repoDetailModal');
+            },
+
+            toggleTheme() {
+                store.toggleTheme();
+            },
+
+            openInfoModal(type) {
+                const data = POLICY_DATA[type];
+                if (!data) return;
+
+                const titleEl = document.getElementById('infoModalTitle');
+                const contentEl = document.getElementById('infoModalRef');
+
+                titleEl.innerHTML = `<i data-lucide="${data.icon}" class="w-6 h-6 text-san-gold"></i> ${data.title}`;
+                contentEl.innerHTML = data.content;
+
+                if (window.lucide) lucide.createIcons();
+                modal.open('infoModal');
+            },
+
+            // Multi-user logic
+            openUserModal() {
+                const list = document.getElementById('userList');
+                list.innerHTML = Object.entries(store.data.users).map(([id, user]) => `
+                    <div class="flex items-center justify-between p-3 border border-gray-200 dark:border-san-border rounded-lg ${id === store.data.currentUser ? 'bg-san-gold/10 border-san-gold' : 'hover:bg-gray-50 dark:hover:bg-san-btn'} cursor-pointer" onclick="app.switchUser('${id}')">
+                         <div class="flex items-center gap-3">
+                             <img src="${user.meta.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Guest'}" class="w-10 h-10 rounded-full bg-gray-200">
+                             <div>
+                                 <div class="font-bold text-gray-900 dark:text-san-cream">${user.meta.displayName} ${id === store.data.currentUser ? '<span class="text-xs text-san-gold">(Active)</span>' : ''}</div>
+                                 <div class="text-xs text-gray-500 dark:text-san-muted">${user.meta.owner}</div>
+                             </div>
+                         </div>
+                         ${id === store.data.currentUser ? '<i data-lucide="check" class="text-san-gold"></i>' : ''}
+                    </div>
+                `).join('');
+                if (window.lucide) lucide.createIcons();
+                modal.open('userModal');
+            },
+
+            switchUser(id) {
+                const result = store.switchUser(id);
+                if (result.success) {
+                    modal.close('userModal');
+                    window.location.reload();
+                } else if (result.reason === 'password_required') {
+                    this.pendingSwitchId = id;
+                    document.getElementById('loginPassword').value = '';
+                    modal.open('loginModal');
+                } else {
+                    alert("Error switching user: " + result.reason);
+                }
+            },
+
+            verifyLogin() {
+                const pass = document.getElementById('loginPassword').value;
+                const result = store.switchUser(this.pendingSwitchId, pass);
+                if (result.success) {
+                    modal.close('loginModal');
+                    modal.close('userModal');
+                    window.location.reload();
+                } else {
+                    alert("Incorrect password. Please try again.");
+                    document.getElementById('loginPassword').value = '';
+                }
+            },
+
+            createNewUser() {
+                const name = document.getElementById('newUserName').value.trim();
+                const pass = document.getElementById('newUserPassword').value || null;
+                if (!name) return;
+                store.createUser(name, pass);
+                window.location.reload();
+            },
+
+            openEditProfileModal() {
+                const meta = store.currentUser.meta;
+                const f = document.getElementById('profileEditForm');
+
+                f.displayName.value = meta.displayName;
+                f.owner.value = meta.owner;
+                f.bio.value = meta.bio;
+                f.location.value = meta.contact.location;
+                f.email.value = meta.contact.email;
+                f.website.value = meta.contact.website;
+                f.whatsapp.value = meta.contact.whatsapp;
+                f.instagram.value = meta.contact.instagram;
+                f.linkedin.value = meta.contact.linkedin;
+                f.skills.value = meta.skills.join(', ');
+                f.password.value = ''; // Reset password field
+
+                modal.open('editProfileModal');
+            },
+
+            setupEventListeners() {
+                // Profile Edit Form
+                document.getElementById('profileEditForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.target);
+                    const meta = store.currentUser.meta;
+
+                    meta.displayName = fd.get('displayName');
+                    meta.owner = fd.get('owner');
+                    meta.bio = fd.get('bio');
+                    meta.contact.location = fd.get('location');
+                    meta.contact.email = fd.get('email');
+                    meta.contact.website = fd.get('website');
+                    meta.contact.whatsapp = fd.get('whatsapp');
+                    meta.contact.instagram = fd.get('instagram');
+                    meta.contact.linkedin = fd.get('linkedin');
+                    meta.skills = fd.get('skills').split(',').map(s => s.trim()).filter(s => s);
+
+                    const newPass = fd.get('password');
+                    if (newPass) meta.password = newPass;
+
+                    store.save();
+                    modal.close('editProfileModal');
+                    this.updateProfileUI();
+                    this.typingEffect(); // Re-trigger typing effect for new bio
+                });
+
+                // Edit Repo Form
+                document.getElementById('editRepoForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.target);
+                    const id = fd.get('id');
+                    const data = {
+                        name: fd.get('name'),
+                        description: fd.get('description'),
+                        language: fd.get('language'),
+                        readme: fd.get('readme')
+                    };
+                    if (store.updateRepo(id, data)) {
+                        modal.close('editRepoModal');
+                        this.render();
+                    }
+                });
+
+                // Edit Project Form
+                document.getElementById('editProjectForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.target);
+                    const id = fd.get('id');
+                    const data = {
+                        title: fd.get('title'),
+                        host_url: fd.get('host_url'),
+                        description: fd.get('description')
+                    };
+                    if (store.updateProject(id, data)) {
+                        modal.close('editProjectModal');
+                        this.render();
+                    }
+                });
+
+                // Repo Form
+                document.getElementById('repoForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.target);
+                    const sourceCode = fd.get('source_code') || '';
+                    const newRepo = {
+                        id: fd.get('name').toLowerCase().replace(/\s+/g, '-'),
+                        name: fd.get('name'),
+                        description: fd.get('description'),
+                        language: fd.get('language') || 'Text',
+                        live_url: fd.get('live_url') || '',
+                        source_code: sourceCode,
+                        tags: (fd.get('tags') || '').split(',').map(t => t.trim()).filter(t => t),
+                        updated_at: new Date().toISOString(),
+                        stars: 0,
+                        readme: fd.get('readme'),
+                        demo_url: '#',
+                        files: [
+                            { name: "README.md", type: "file", content: fd.get('readme'), size: "1kb" }
+                        ]
+                    };
+
+                    // Automatically add source.txt if code is provided
+                    if (sourceCode) {
+                        newRepo.files.push({
+                            name: "source.txt",
+                            type: "file",
+                            content: sourceCode,
+                            size: (sourceCode.length / 1024).toFixed(1) + "kb"
+                        });
+                    }
+
+                    store.addRepo(newRepo);
+                    modal.close('repoModal');
+                    e.target.reset();
+                    if (this.currentTab !== 'repositories') window.location.hash = '#repositories';
+
+                    // Auto-refresh to ensure UI is fully updated
+                    window.location.reload();
+                });
+
+                // Project Form
+                document.getElementById('projectForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.target);
+                    const newProj = {
+                        id: fd.get('title').toLowerCase().replace(/\s+/g, '-'),
+                        title: fd.get('title'),
+                        host_url: fd.get('host_url'),
+                        description: fd.get('description'),
+                        tags: ['web'],
+                        published_at: new Date().toISOString()
+                    };
+                    store.addProject(newProj);
+                    modal.close('projectModal');
+                    e.target.reset();
+                    window.location.hash = '#projects';
+
+                    // Auto-refresh to ensure UI is fully updated
+                    window.location.reload();
+                });
+
+                // Global Search (Debounced slightly by logic in renderer but added here for enter key)
+                document.getElementById('globalSearch').addEventListener('input', (e) => {
+                    // Redirect to repos tab to show results
+                    if (this.currentTab !== 'repositories') window.location.hash = '#repositories';
+                    // The view renderer grabs the value directly
+                    setTimeout(() => this.render(), 100);
+                });
+            }
+        };
+
+        // --- 5. UI Helpers (Modals, Drawer, Dropdowns) ---
+
+        const modal = {
+            open(id) {
+                const m = document.getElementById(id);
+                m.classList.remove('hidden');
+                // Small delay for transition
+                setTimeout(() => m.classList.remove('opacity-0'), 10);
+                if (id === 'repoModal') {
+                    const content = document.getElementById('repoModalContent');
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }
+            },
+            close(id) {
+                const m = document.getElementById(id);
+                m.classList.add('opacity-0');
+                if (id === 'repoModal') {
+                    const content = document.getElementById('repoModalContent');
+                    content.classList.remove('scale-100');
+                    content.classList.add('scale-95');
+                }
+                // Wait for transition
+                setTimeout(() => {
+                    m.classList.add('hidden');
+                    // Stop iframes
+                    const iframe = m.querySelector('iframe');
+                    if (iframe) iframe.src = '';
+                }, 300);
+            }
+        };
+
+        const drawer = {
+            open(repoId) {
+                const repo = store.data.repositories.find(r => r.id === repoId);
+                if (!repo) return;
+
+                document.getElementById('drawerTitle').textContent = repo.name;
+                document.getElementById('drawerDesc').textContent = repo.description;
+                document.getElementById('drawerReadme').innerHTML = utils.renderMarkdown(repo.readme || 'No README provided.');
+
+                const tagContainer = document.getElementById('drawerTags');
+                tagContainer.innerHTML = (repo.tags || []).map(t => `<span class="text-xs bg-gray-200 dark:bg-san-btn border border-gray-300 dark:border-san-border px-2 py-1 rounded-md text-gray-700 dark:text-san-cream">#${t}</span>`).join('');
+
+                // Setup Buttons
+                const starBtn = document.getElementById('drawerStarBtn');
+                starBtn.onclick = () => { store.toggleStar(repo.id); app.render(); };
+
+                const dlBtn = document.getElementById('drawerDownloadBtn');
+                dlBtn.onclick = () => {
+                    const blob = new Blob([repo.readme || ''], { type: "text/markdown" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${repo.name}-README.md`;
+                    a.click();
+                };
+
+                const d = document.getElementById('detailsDrawer');
+                d.classList.remove('translate-x-full');
+            },
+            close() {
+                document.getElementById('detailsDrawer').classList.add('translate-x-full');
+            }
+        };
+
+        // Dropdown toggler
+        window.toggleDropdown = (id) => {
+            document.getElementById(id).classList.toggle('hidden');
+        };
+
+        // Close dropdowns on click outside
+        window.onclick = function (event) {
+            if (!event.target.matches('.dropbtn') && !event.target.closest('button')) {
+                const dropdowns = document.getElementsByClassName("dropdown-content");
+                // Simplified for specific ID here
+                const dd = document.getElementById('addDropdown');
+                if (dd && !dd.classList.contains('hidden')) dd.classList.add('hidden');
+            }
+        }
+
+        window.toggleMobileMenu = () => {
+            alert("Mobile menu would expand here in full version.");
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            app.start();
+        });
+
+    </script>
+
+    <!-- 3D Logic Module -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        let scene, camera, renderer, model, controls, animationId;
+        let modelPlaylist = [
+            'models/Sword.glb', 'models/AK-47.glb', 'models/Dron.glb', 'models/S24.glb',
+            'models/Tank.glb', 'models/car1.glb', 'models/Loptop.glb', 'models/Rocket Launcher.glb',
+            'models/Digtool.glb', 'models/Electric current post.glb', 'models/Fan.glb',
+            'models/Leef_31.glb', 'models/MOBIL.glb', 'models/New_Mobile.glb', 'models/Scall.glb',
+            'models/sniper.glb', 'models/villag.glb', 'models/wind mill.glb', 'models/lightouse.glb'
+        ];
+        let currentModelIndex = 0;
+        let cycleInterval = null;
+
+        window.initSanHub3D = function () {
+            const container = document.getElementById('model-container');
+            if (!container) return;
+
+            // cleanup
+            const oldCanvas = container.querySelector('canvas');
+            if (oldCanvas) oldCanvas.remove();
+            if (cycleInterval) clearInterval(cycleInterval);
+
+            // Ensure placeholder is visible initially
+            const placeholder = document.getElementById('canvas-placeholder');
+            if (placeholder) {
+                placeholder.innerHTML = `
+                    <i data-lucide="box" class="w-8 h-8 opacity-50 mb-2"></i>
+                    <span class="text-xs">Loading 3D Engine...</span>
+                `;
+                placeholder.style.display = 'flex';
+                if (window.lucide) lucide.createIcons();
+            }
+
+            // 1. Scene Setup
+            scene = new THREE.Scene();
+
+            // 2. Camera
+            const aspect = container.clientWidth / container.clientHeight;
+            camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
+            camera.position.set(3, 2, 5);
+
+            // 3. Renderer
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // 4. Lights
+            scene.add(new THREE.AmbientLight(0xffffff, 1));
+            const dirLight = new THREE.DirectionalLight(0xc47f00, 2);
+            dirLight.position.set(5, 5, 5);
+            scene.add(dirLight);
+            const blueLight = new THREE.DirectionalLight(0x0044ff, 1);
+            blueLight.position.set(-5, 0, -5);
+            scene.add(blueLight);
+
+            // 5. Controls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 2.0;
+
+            // 6. Load Initial Model
+            const isDefault = store.data.currentUser === 'default';
+            if (isDefault) {
+                loadGLB(modelPlaylist[currentModelIndex]);
+                // Start Cycle
+                cycleInterval = setInterval(() => {
+                    currentModelIndex = (currentModelIndex + 1) % modelPlaylist.length;
+                    loadGLB(modelPlaylist[currentModelIndex]);
+                }, 7000);
+            } else {
+                loadGLB('models/Sword.glb');
+            }
+
+            // 7. File Upload Listener
+            const input = document.getElementById('glbUpload');
+            if (input) {
+                input.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    if (cycleInterval) clearInterval(cycleInterval); // Stop auto-cycle on manual upload
+                    const url = URL.createObjectURL(file);
+                    loadGLB(url);
+                });
+            }
+
+            window.addEventListener('resize', onWindowResize);
+            animate();
+        };
+
+        function loadGLB(url) {
+            const loader = new GLTFLoader();
+            const fileName = url.split('/').pop();
+
+            loader.load(url, (gltf) => {
+                if (model) scene.remove(model);
+                model = gltf.scene;
+
+                // Auto-center and scale
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scale = 3.5 / (maxDim || 1); // Slightly larger scale
+                model.scale.setScalar(scale);
+                model.position.sub(center.multiplyScalar(scale));
+
+                scene.add(model);
+
+                const placeholder = document.getElementById('canvas-placeholder');
+                if (placeholder) placeholder.style.display = 'none';
+            }, undefined, (error) => {
+                console.warn("Could not load model:", fileName, error);
+                const placeholder = document.getElementById('canvas-placeholder');
+                if (placeholder && !model) {
+                    placeholder.innerHTML = `
+                        <div class="flex flex-col items-center text-center p-4">
+                            <i data-lucide="alert-triangle" class="w-8 h-8 opacity-50 text-san-gold mb-2"></i>
+                            <span class="text-xs text-gray-400">Failed to load ${fileName}<br>Upload a .glb file to see it here.</span>
+                        </div>
+                    `;
+                    placeholder.style.display = 'flex';
+                    if (window.lucide) lucide.createIcons();
+                }
+            });
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('model-container');
+            if (!container || !camera || !renderer) return;
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        function animate() {
+            if (!document.getElementById('model-container')) {
+                if (cycleInterval) clearInterval(cycleInterval);
+                return;
+            }
+            animationId = requestAnimationFrame(animate);
+            if (controls) controls.update();
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+
+</html>
