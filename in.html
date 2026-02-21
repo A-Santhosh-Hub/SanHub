@@ -247,6 +247,9 @@
                             <a href="#" id="headerNewProject"
                                 onclick="modal.open('projectModal'); toggleDropdown('addDropdown')"
                                 class="block px-4 py-2 text-sm hover:bg-san-gold hover:text-black">New project</a>
+                            <a href="#" id="headerNewSkill"
+                                onclick="app.openSkillModal(); toggleDropdown('addDropdown')"
+                                class="block px-4 py-2 text-sm hover:bg-san-gold hover:text-black">New skill</a>
                             <div id="headerDivider" class="border-t border-gray-200 dark:border-san-border my-1"></div>
                             <a href="#" onclick="app.openUserModal(); toggleDropdown('addDropdown')"
                                 class="block px-4 py-2 text-sm hover:bg-san-gold hover:text-black text-san-gold font-bold">Switch
@@ -290,6 +293,11 @@
                     class="nav-tab flex items-center gap-2 pb-3 text-sm text-gray-500 dark:text-san-muted hover:text-gray-900 dark:hover:text-san-cream border-b-2 border-transparent transition-all whitespace-nowrap"
                     id="tab-projects">
                     <i data-lucide="layout-template" class="w-4 h-4"></i> Projects
+                </a>
+                <a href="#skills"
+                    class="nav-tab flex items-center gap-2 pb-3 text-sm text-gray-500 dark:text-san-muted hover:text-gray-900 dark:hover:text-san-cream border-b-2 border-transparent transition-all whitespace-nowrap"
+                    id="tab-skills">
+                    <i data-lucide="cpu" class="w-4 h-4"></i> Skills
                 </a>
                 <a href="#packages"
                     class="nav-tab flex items-center gap-2 pb-3 text-sm text-gray-500 dark:text-san-muted hover:text-gray-900 dark:hover:text-san-cream border-b-2 border-transparent transition-all whitespace-nowrap"
@@ -672,6 +680,47 @@
         </div>
     </div>
 
+    <!-- Add Skill Modal -->
+    <div id="skillModal" class="fixed inset-0 glass-modal hidden z-50 flex items-center justify-center p-4">
+        <div
+            class="bg-white dark:bg-san-card border border-gray-200 dark:border-san-border w-full max-w-sm rounded-lg shadow-2xl">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-san-border">
+                <h3 id="skillModalTitle" class="text-lg font-bold text-gray-900 dark:text-san-cream">Add New Skill</h3>
+                <button onclick="modal.close('skillModal')" class="text-gray-500 hover:text-red-500"><i data-lucide="x"
+                        class="w-5 h-5"></i></button>
+            </div>
+            <form id="skillForm" class="p-4 space-y-4">
+                <input type="hidden" name="skillId">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-san-cream mb-1">Skill Name</label>
+                    <input type="text" name="name" required placeholder="e.g. JavaScript"
+                        class="w-full bg-gray-100 dark:bg-san-dark border border-gray-300 dark:border-san-border rounded-md p-2 text-gray-900 dark:text-san-cream focus:border-san-gold outline-none">
+                </div>
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-san-cream">Proficiency
+                            Level</label>
+                        <span id="levelValue" class="text-sm font-bold text-san-gold">5/10</span>
+                    </div>
+                    <input type="range" name="level" min="0" max="10" step="1" value="5"
+                        oninput="document.getElementById('levelValue').textContent = this.value + '/10'"
+                        class="w-full h-2 bg-gray-200 dark:bg-san-border rounded-lg appearance-none cursor-pointer accent-san-gold">
+                    <div class="flex justify-between text-[10px] text-gray-400 mt-1">
+                        <span>Beginner</span>
+                        <span>Expert</span>
+                    </div>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="modal.close('skillModal')"
+                        class="px-4 py-2 border border-gray-300 dark:border-san-border rounded-md text-gray-700 dark:text-san-cream">Cancel</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-san-gold hover:bg-san-goldHover text-black font-bold rounded-md">Save
+                        Skill</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Edit Repo Modal -->
     <div id="editRepoModal" class="fixed inset-0 glass-modal hidden z-50 flex items-center justify-center p-4">
         <div
@@ -922,6 +971,11 @@
                     youtube: "https://youtube.com/@crazyvideos788?si=r4XQDUKeqeJb5Fes"
                 },
                 skills: ["JavaScript", "HTML/CSS", "React", "Node.js", "Tailwind"],
+                proficiencySkills: [
+                    { id: 's1', name: 'HTML', level: 9 },
+                    { id: 's2', name: 'JavaScript', level: 8 },
+                    { id: 's3', name: 'Tailwind CSS', level: 7 }
+                ],
                 password: null // New: Account lock
             },
             repositories: [
@@ -1098,6 +1152,30 @@
                     refId: proj.id
                 });
                 this.save();
+            },
+            addSkill(skill) {
+                if (!this.currentUser.meta.proficiencySkills) {
+                    this.currentUser.meta.proficiencySkills = [];
+                }
+                this.currentUser.meta.proficiencySkills.unshift(skill);
+                this.addActivity({
+                    type: 'skill',
+                    text: `Added skill ${skill.name} (Level ${skill.level}/10)`,
+                    date: new Date().toISOString()
+                });
+                this.save();
+            },
+            deleteSkill(id) {
+                this.currentUser.meta.proficiencySkills = this.currentUser.meta.proficiencySkills.filter(s => s.id !== id);
+                this.save();
+            },
+            updateSkill(id, name, level) {
+                const skill = this.currentUser.meta.proficiencySkills.find(s => s.id === id);
+                if (skill) {
+                    skill.name = name;
+                    skill.level = level;
+                    this.save();
+                }
             },
             addActivity(act) {
                 this.currentUser.activity.unshift(act);
@@ -1755,6 +1833,76 @@
                         </div>
                     </div>
                 `;
+            },
+
+            skills() {
+                const skills = store.currentUser.meta.proficiencySkills || [];
+
+                const getBarColor = (level) => {
+                    if (level <= 3) return 'bg-red-500';
+                    if (level <= 6) return 'bg-orange-500';
+                    if (level <= 8) return 'bg-blue-500';
+                    return 'bg-green-500';
+                };
+
+                return `
+                    <div class="fade-in">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-900 dark:text-san-cream">Skills & Proficiency</h1>
+                                <p class="text-sm text-gray-500 dark:text-san-muted mt-1">Showcase your technical expertise and skill levels.</p>
+                            </div>
+                            <button onclick="app.openSkillModal()" class="flex items-center gap-2 bg-san-gold hover:bg-san-goldHover text-black px-4 py-2 rounded-md font-bold text-sm transition-all shadow-lg hover:scale-105 active:scale-95">
+                                <i data-lucide="plus" class="w-4 h-4"></i> Add New Skill
+                            </button>
+                        </div>
+
+                        ${skills.length === 0 ? `
+                            <div class="py-20 text-center border-2 border-dashed border-gray-200 dark:border-san-border rounded-xl">
+                                <div class="w-16 h-16 bg-gray-100 dark:bg-san-btn rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                                    <i data-lucide="cpu" class="w-8 h-8"></i>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-san-cream">No skills added yet</h3>
+                                <p class="text-gray-500 dark:text-san-muted mb-6">Start by adding your first skill proficiency.</p>
+                                <button onclick="app.openSkillModal()" class="text-san-gold font-bold hover:underline">Add a skill now</button>
+                            </div>
+                        ` : `
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                ${skills.map(s => `
+                                    <div class="bg-white dark:bg-san-card border border-gray-200 dark:border-san-border rounded-xl p-5 shadow-sm hover:shadow-md transition-all group relative">
+                                        <div class="flex justify-between items-start mb-4">
+                                            <div class="font-bold text-lg text-gray-900 dark:text-san-cream">${utils.sanitize(s.name)}</div>
+                                            <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button onclick="app.openSkillModal('${s.id}')" class="p-1.5 text-gray-400 hover:text-san-gold transition-colors">
+                                                    <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                                </button>
+                                                <button onclick="app.confirmDeleteSkill('${s.id}', '${utils.sanitize(s.name)}')" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
+                                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-end mb-2">
+                                            <span class="text-xs font-bold text-gray-500 dark:text-san-muted uppercase tracking-wider">Proficiency</span>
+                                            <span class="text-sm font-black text-gray-900 dark:text-san-cream">${s.level}/10</span>
+                                        </div>
+                                        
+                                        <div class="w-full h-3 bg-gray-100 dark:bg-san-btn rounded-full overflow-hidden shadow-inner">
+                                            <div class="h-full ${getBarColor(s.level)} rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(0,0,0,0.1)]" 
+                                                 style="width: 0%" 
+                                                 data-width="${s.level * 10}%">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-2 flex justify-end">
+                                            <span class="text-[10px] font-bold ${getBarColor(s.level).replace('bg-', 'text-')}">${s.level * 10}%</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `}
+                    </div>
+                `;
             }
         };
 
@@ -2090,6 +2238,15 @@
                 }
 
                 if (window.lucide) lucide.createIcons();
+                this.animateSkillBars();
+            },
+
+            animateSkillBars() {
+                setTimeout(() => {
+                    document.querySelectorAll('[data-width]').forEach(bar => {
+                        bar.style.width = bar.getAttribute('data-width');
+                    });
+                }, 100);
             },
 
             renderRepositories() {
@@ -2305,6 +2462,35 @@
                 modal.open('infoModal');
             },
 
+            openSkillModal(id = null) {
+                const form = document.getElementById('skillForm');
+                form.reset();
+                document.getElementById('levelValue').textContent = '5/10';
+
+                if (id) {
+                    const skill = store.currentUser.meta.proficiencySkills.find(s => s.id === id);
+                    if (skill) {
+                        document.getElementById('skillModalTitle').textContent = 'Edit Skill';
+                        form.skillId.value = skill.id;
+                        form.name.value = skill.name;
+                        form.level.value = skill.level;
+                        document.getElementById('levelValue').textContent = skill.level + '/10';
+                    }
+                } else {
+                    document.getElementById('skillModalTitle').textContent = 'Add New Skill';
+                    form.skillId.value = '';
+                }
+
+                modal.open('skillModal');
+            },
+
+            confirmDeleteSkill(id, name) {
+                if (confirm(`Are you sure you want to delete the skill "${name}"?`)) {
+                    store.deleteSkill(id);
+                    this.render();
+                }
+            },
+
             // Multi-user logic
             openUserModal() {
                 const list = document.getElementById('userList');
@@ -2498,6 +2684,28 @@
 
                     // Auto-refresh to ensure UI is fully updated
                     window.location.reload();
+                });
+
+                document.getElementById('skillForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    const id = formData.get('skillId');
+                    const name = formData.get('name');
+                    const level = parseInt(formData.get('level'));
+
+                    if (id) {
+                        store.updateSkill(id, name, level);
+                    } else {
+                        const newSkill = {
+                            id: 's' + Date.now(),
+                            name: name,
+                            level: level
+                        };
+                        store.addSkill(newSkill);
+                    }
+
+                    modal.close('skillModal');
+                    this.render();
                 });
 
                 // Global Search (Debounced slightly by logic in renderer but added here for enter key)
