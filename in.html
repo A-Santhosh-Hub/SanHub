@@ -1852,9 +1852,11 @@
                                 <h1 class="text-2xl font-bold text-gray-900 dark:text-san-cream">Skills & Proficiency</h1>
                                 <p class="text-sm text-gray-500 dark:text-san-muted mt-1">Showcase your technical expertise and skill levels.</p>
                             </div>
-                            <button onclick="app.openSkillModal()" class="flex items-center gap-2 bg-san-gold hover:bg-san-goldHover text-black px-4 py-2 rounded-md font-bold text-sm transition-all shadow-lg hover:scale-105 active:scale-95">
-                                <i data-lucide="plus" class="w-4 h-4"></i> Add New Skill
-                            </button>
+                            ${store.data.currentUser !== 'default' ? `
+                                <button onclick="app.openSkillModal()" class="flex items-center gap-2 bg-san-gold hover:bg-san-goldHover text-black px-4 py-2 rounded-md font-bold text-sm transition-all shadow-lg hover:scale-105 active:scale-95">
+                                    <i data-lucide="plus" class="w-4 h-4"></i> Add New Skill
+                                </button>
+                            ` : ''}
                         </div>
 
                         ${skills.length === 0 ? `
@@ -1864,7 +1866,9 @@
                                 </div>
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-san-cream">No skills added yet</h3>
                                 <p class="text-gray-500 dark:text-san-muted mb-6">Start by adding your first skill proficiency.</p>
-                                <button onclick="app.openSkillModal()" class="text-san-gold font-bold hover:underline">Add a skill now</button>
+                                ${store.data.currentUser !== 'default' ? `
+                                    <button onclick="app.openSkillModal()" class="text-san-gold font-bold hover:underline">Add a skill now</button>
+                                ` : ''}
                             </div>
                         ` : `
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1872,14 +1876,16 @@
                                     <div class="bg-white dark:bg-san-card border border-gray-200 dark:border-san-border rounded-xl p-5 shadow-sm hover:shadow-md transition-all group relative">
                                         <div class="flex justify-between items-start mb-4">
                                             <div class="font-bold text-lg text-gray-900 dark:text-san-cream">${utils.sanitize(s.name)}</div>
-                                            <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button onclick="app.openSkillModal('${s.id}')" class="p-1.5 text-gray-400 hover:text-san-gold transition-colors">
-                                                    <i data-lucide="edit-2" class="w-4 h-4"></i>
-                                                </button>
-                                                <button onclick="app.confirmDeleteSkill('${s.id}', '${utils.sanitize(s.name)}')" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
-                                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                                </button>
-                                            </div>
+                                            ${store.data.currentUser !== 'default' ? `
+                                                <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button onclick="app.openSkillModal('${s.id}')" class="p-1.5 text-gray-400 hover:text-san-gold transition-colors">
+                                                        <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                                    </button>
+                                                    <button onclick="app.confirmDeleteSkill('${s.id}', '${utils.sanitize(s.name)}')" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
+                                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                                    </button>
+                                                </div>
+                                            ` : ''}
                                         </div>
                                         
                                         <div class="flex justify-between items-end mb-2">
@@ -2075,10 +2081,12 @@
                 // Header Dropdown management
                 const headerNewRepo = document.getElementById('headerNewRepo');
                 const headerNewProject = document.getElementById('headerNewProject');
+                const headerNewSkill = document.getElementById('headerNewSkill');
                 const headerDivider = document.getElementById('headerDivider');
 
                 if (headerNewRepo) headerNewRepo.style.display = isDefaultUser ? 'none' : 'block';
                 if (headerNewProject) headerNewProject.style.display = isDefaultUser ? 'none' : 'block';
+                if (headerNewSkill) headerNewSkill.style.display = isDefaultUser ? 'none' : 'block';
                 if (headerDivider) headerDivider.style.display = isDefaultUser ? 'none' : 'block';
 
                 // Hide export/import for default user
@@ -2463,6 +2471,10 @@
             },
 
             openSkillModal(id = null) {
+                if (store.data.currentUser === 'default') {
+                    alert("Skill management is restricted for the default account. Switch to a custom account to manage skills.");
+                    return;
+                }
                 const form = document.getElementById('skillForm');
                 form.reset();
                 document.getElementById('levelValue').textContent = '5/10';
