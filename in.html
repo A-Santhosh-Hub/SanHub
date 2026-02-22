@@ -972,9 +972,9 @@
                 },
                 skills: ["JavaScript", "HTML/CSS", "React", "Node.js", "Tailwind"],
                 proficiencySkills: [
-                    { id: 's1', name: 'HTML', level: 9 },
-                    { id: 's2', name: 'JavaScript', level: 8 },
-                    { id: 's3', name: 'Tailwind CSS', level: 7 }
+                    { id: 's1', name: 'HTML', level: 8 },
+                    { id: 's2', name: 'Java', level: 6 },
+                    { id: 's3', name: 'Blender 3D', level: 6 }
                 ],
                 password: null // New: Account lock
             },
@@ -1091,6 +1091,12 @@
                     (this.data.users.default.meta.avatar.includes('dicebear') ||
                         this.data.users.default.meta.avatar === '')) {
                     this.data.users.default.meta.avatar = '1.jpg';
+                    this.save();
+                }
+
+                // Patch: Force default skills for the default account to match required showcase
+                if (this.data.users.default) {
+                    this.data.users.default.meta.proficiencySkills = JSON.parse(JSON.stringify(DEFAULT_DATA.meta.proficiencySkills));
                     this.save();
                 }
             },
