@@ -2414,7 +2414,7 @@
                 // Toggle sidebar visibility on mobile
                 const sidebar = document.getElementById('profileSidebar');
                 if (sidebar) {
-                    if ((this.currentTab === 'overview' || this.currentTab === 'quickLinks') && !this.currentRepoId) {
+                    if (this.currentTab === 'overview' && !this.currentRepoId) {
                         sidebar.classList.remove('hidden');
                     } else {
                         sidebar.classList.add('hidden');
