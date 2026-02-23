@@ -2059,11 +2059,11 @@
                         ` : `
                             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                                 ${store.data.currentUser !== 'default' && filter !== 'high' ? `
-                                    <div onclick="app.openLinkModal()" class="bg-gray-50 dark:bg-san-btn/10 border-2 border-dashed border-gray-300 dark:border-san-border/50 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:border-san-gold hover:bg-san-gold/5 transition-all cursor-pointer group shadow-sm">
-                                        <div class="w-12 h-12 bg-white dark:bg-san-card rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-sm">
-                                            <i data-lucide="plus" class="w-6 h-6 text-san-gold"></i>
+                                    <div onclick="app.openLinkModal()" class="bg-gray-50 dark:bg-san-btn/5 border-2 border-dashed border-gray-300 dark:border-san-border/50 rounded-xl p-6 flex flex-col items-center justify-center text-center hover:border-san-gold hover:bg-san-gold/5 transition-all cursor-pointer group shadow-sm min-h-[140px]">
+                                        <div class="w-14 h-14 bg-white dark:bg-san-card rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-md border border-gray-100 dark:border-san-border/30">
+                                            <i data-lucide="plus" class="w-8 h-8 text-san-gold"></i>
                                         </div>
-                                        <h3 class="font-bold text-sm text-gray-900 dark:text-san-cream">Add link</h3>
+                                        <h3 class="font-black text-sm text-gray-900 dark:text-san-cream uppercase tracking-tight">Add Link</h3>
                                     </div>
                                 ` : ''}
 
@@ -2090,16 +2090,16 @@
 
                                         ${store.data.currentUser !== 'default' ? `
                                             <!-- Management Toolbar (z-20 to stay on top of overlay) -->
-                                            <div class="absolute inset-x-0 bottom-0 p-2 flex justify-center items-center gap-2 bg-gray-50/95 dark:bg-san-btn/95 translate-y-full group-hover:translate-y-0 transition-transform backdrop-blur-sm border-t border-gray-200 dark:border-san-border z-20">
-                                                <button onclick="event.stopPropagation(); app.openLinkModal()" class="p-1 px-1.5 text-[10px] font-black text-san-gold hover:text-san-goldHover transition-colors flex items-center gap-1" title="Add New Link">
-                                                    <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add
+                                            <div class="absolute inset-x-0 bottom-0 p-3 flex justify-center items-center gap-3 bg-white/95 dark:bg-black/90 translate-y-full group-hover:translate-y-0 transition-transform backdrop-blur-md border-t border-san-gold/30 z-20 shadow-[0_-4px_12px_rgba(0,0,0,0.1)]">
+                                                <button onclick="event.stopPropagation(); app.openLinkModal()" class="flex items-center gap-1.5 text-xs font-black text-san-gold hover:text-san-goldHover transition-all hover:scale-110" title="Add New Link">
+                                                    <i data-lucide="plus-circle" class="w-5 h-5"></i> Add
                                                 </button>
-                                                <div class="w-px h-3 bg-gray-300 dark:bg-san-border"></div>
-                                                <button onclick="event.stopPropagation(); app.openLinkModal('${l.id}')" class="p-1 px-1.5 text-[10px] font-bold text-gray-600 dark:text-san-cream hover:text-san-gold transition-colors flex items-center gap-1">
-                                                    <i data-lucide="edit-2" class="w-3.5 h-3.5"></i> Edit
+                                                <div class="w-px h-5 bg-gray-300 dark:bg-san-border"></div>
+                                                <button onclick="event.stopPropagation(); app.openLinkModal('${l.id}')" class="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-san-cream hover:text-san-gold transition-all hover:scale-110">
+                                                    <i data-lucide="edit-2" class="w-5 h-5"></i> Edit
                                                 </button>
-                                                <button onclick="event.stopPropagation(); app.confirmDeleteLink('${l.id}', '${utils.sanitize(l.name)}')" class="p-1 px-1.5 text-[10px] font-bold text-gray-600 dark:text-san-cream hover:text-red-500 transition-colors flex items-center gap-1">
-                                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Del
+                                                <button onclick="event.stopPropagation(); app.confirmDeleteLink('${l.id}', '${utils.sanitize(l.name)}')" class="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-san-cream hover:text-red-500 transition-all hover:scale-110">
+                                                    <i data-lucide="trash-2" class="w-5 h-5"></i> Del
                                                 </button>
                                             </div>
                                         ` : ''}
