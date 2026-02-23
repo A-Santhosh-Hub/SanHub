@@ -2045,57 +2045,64 @@
                                         <option value="high" ${filter === 'high' ? 'selected' : ''}>High Priority</option>
                                     </select>
                                 </div>
-                                ${store.data.currentUser !== 'default' ? `
-                                    <button onclick="app.openLinkModal()" class="flex items-center gap-2 bg-san-gold hover:bg-san-goldHover text-black px-4 py-2 rounded-md font-bold text-sm transition-all shadow-lg hover:scale-105 active:scale-95">
-                                        <i data-lucide="plus" class="w-4 h-4"></i> Add New Link
-                                    </button>
-                                ` : ''}
                             </div>
                         </div>
 
-                        ${filteredLinks.length === 0 ? `
+                        ${filteredLinks.length === 0 && store.data.currentUser === 'default' ? `
                             <div class="py-20 text-center border-2 border-dashed border-gray-200 dark:border-san-border rounded-xl">
                                 <div class="w-16 h-16 bg-gray-100 dark:bg-san-btn rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
                                     <i data-lucide="link-2" class="w-8 h-8"></i>
                                 </div>
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-san-cream">No links found</h3>
                                 <p class="text-gray-500 dark:text-san-muted mb-6">${filter === 'high' ? 'You have no high-priority links.' : 'Start by adding your favorite web links.'}</p>
-                                ${store.data.currentUser !== 'default' ? `
-                                    <button onclick="app.openLinkModal()" class="text-san-gold font-bold hover:underline">Add a link now</button>
-                                ` : ''}
                             </div>
                         ` : `
                             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                                ${store.data.currentUser !== 'default' && filter !== 'high' ? `
+                                    <div onclick="app.openLinkModal()" class="bg-gray-50 dark:bg-san-btn/10 border-2 border-dashed border-gray-300 dark:border-san-border/50 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:border-san-gold hover:bg-san-gold/5 transition-all cursor-pointer group shadow-sm">
+                                        <div class="w-12 h-12 bg-white dark:bg-san-card rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-sm">
+                                            <i data-lucide="plus" class="w-6 h-6 text-san-gold"></i>
+                                        </div>
+                                        <h3 class="font-bold text-sm text-gray-900 dark:text-san-cream">Add link</h3>
+                                    </div>
+                                ` : ''}
+
                                 ${filteredLinks.map(l => `
-                                    <div class="bg-white dark:bg-san-card border border-gray-200 dark:border-san-border rounded-xl p-4 shadow-sm hover:shadow-md hover:border-san-gold/50 transition-all group relative overflow-hidden">
+                                    <div class="bg-white dark:bg-san-card border border-gray-200 dark:border-san-border rounded-xl p-4 shadow-sm hover:shadow-md hover:border-san-gold/50 transition-all group relative overflow-hidden h-full flex flex-col">
                                         ${l.isHighPriority ? `
                                             <div class="absolute top-0 right-0">
                                                 <div class="bg-san-gold text-[8px] font-black px-2 py-0.5 rounded-bl-lg uppercase tracking-tight text-black shadow-sm">High</div>
                                             </div>
                                         ` : ''}
                                         
-                                        <div class="flex flex-col items-center text-center">
+                                        <div class="flex flex-col items-center text-center flex-1">
                                             <div class="w-12 h-12 bg-gray-100 dark:bg-san-btn rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-inner">
                                                 <i data-lucide="${l.icon || 'link'}" class="w-6 h-6 text-gray-900 dark:text-san-gold"></i>
                                             </div>
                                             <h3 class="font-bold text-sm text-gray-900 dark:text-san-cream truncate w-full mb-1">${utils.sanitize(l.name)}</h3>
-                                            <a href="${l.url}" target="_blank" class="text-[10px] text-blue-500 dark:text-san-blue hover:underline truncate w-full flex items-center justify-center gap-1">
+                                            <div class="text-[10px] text-blue-500 dark:text-san-blue flex items-center justify-center gap-1">
                                                 Visit <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
-                                            </a>
+                                            </div>
                                         </div>
 
+                                        <!-- Main Visit Link Overlay (Active for everyone) -->
+                                        <a href="${l.url}" target="_blank" class="absolute inset-0 z-10 cursor-pointer"></a>
+
                                         ${store.data.currentUser !== 'default' ? `
-                                            <div class="absolute inset-x-0 bottom-0 p-2 flex justify-center gap-2 bg-gray-50/90 dark:bg-san-btn/90 translate-y-full group-hover:translate-y-0 transition-transform backdrop-blur-sm">
-                                                <button onclick="app.openLinkModal('${l.id}')" class="p-1 px-2 text-[10px] font-bold text-gray-600 dark:text-san-cream hover:text-san-gold transition-colors flex items-center gap-1">
-                                                    <i data-lucide="edit-2" class="w-3 h-3"></i> Edit
+                                            <!-- Management Toolbar (z-20 to stay on top of overlay) -->
+                                            <div class="absolute inset-x-0 bottom-0 p-2 flex justify-center items-center gap-2 bg-gray-50/95 dark:bg-san-btn/95 translate-y-full group-hover:translate-y-0 transition-transform backdrop-blur-sm border-t border-gray-200 dark:border-san-border z-20">
+                                                <button onclick="event.stopPropagation(); app.openLinkModal()" class="p-1 px-1.5 text-[10px] font-black text-san-gold hover:text-san-goldHover transition-colors flex items-center gap-1" title="Add New Link">
+                                                    <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add
                                                 </button>
-                                                <button onclick="app.confirmDeleteLink('${l.id}', '${utils.sanitize(l.name)}')" class="p-1 px-2 text-[10px] font-bold text-gray-600 dark:text-san-cream hover:text-red-500 transition-colors flex items-center gap-1">
-                                                    <i data-lucide="trash-2" class="w-3 h-3"></i> Del
+                                                <div class="w-px h-3 bg-gray-300 dark:bg-san-border"></div>
+                                                <button onclick="event.stopPropagation(); app.openLinkModal('${l.id}')" class="p-1 px-1.5 text-[10px] font-bold text-gray-600 dark:text-san-cream hover:text-san-gold transition-colors flex items-center gap-1">
+                                                    <i data-lucide="edit-2" class="w-3.5 h-3.5"></i> Edit
+                                                </button>
+                                                <button onclick="event.stopPropagation(); app.confirmDeleteLink('${l.id}', '${utils.sanitize(l.name)}')" class="p-1 px-1.5 text-[10px] font-bold text-gray-600 dark:text-san-cream hover:text-red-500 transition-colors flex items-center gap-1">
+                                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Del
                                                 </button>
                                             </div>
-                                        ` : `
-                                            <a href="${l.url}" target="_blank" class="absolute inset-0 z-10 opacity-0 cursor-pointer"></a>
-                                        `}
+                                        ` : ''}
                                     </div>
                                 `).join('')}
                             </div>
